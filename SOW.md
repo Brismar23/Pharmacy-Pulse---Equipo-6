@@ -5,10 +5,9 @@
 | Dato | Detalle |
 |---|---|
 | **Cliente** | Pharmacy Pulse |
-| **Contacto del cliente** | Caleb Aguilar Camargo, fundador |
+| **Contacto del cliente** | Caleb Aguilar Camargo |
 | **Equipo propuesto** | Brisa (liderazgo del proyecto), Ana Pau (análisis de datos), Pam (redacción y documentación) y Javier (mapa y revisión técnica) |
 | **Fecha objetivo de entrega** | 29 de enero de 2027 |
-| **Versión** | Borrador basado en el RFP de Equipo 7, publicado el 6 de octubre de 2026 |
 
 > Este documento concreta el alcance solicitado en el RFP. Las decisiones que el RFP deja abiertas —como el nivel geográfico, las categorías de competencia y las ponderaciones del puntaje— deberán confirmarse con Pharmacy Pulse antes del análisis. El precio desglosado es una distribución presupuestal de referencia, no una cotización aprobada.
 
@@ -37,7 +36,7 @@ Al cierre, el proyecto deberá:
 - Generar el ranking, sus indicadores y sus explicaciones.
 - Crear un mapa sencillo para consultar y comparar las zonas.
 - Preparar un repositorio de GitHub con datos públicos utilizados, código y un README en español que explique cómo repetir el análisis.
-- Entregar un resumen ejecutivo de máximo 2 páginas y presentar los resultados al fundador y su equipo.
+- Entregar un resumen ejecutivo de máximo 2 páginas y presentar los resultados al equipo de Pharmacy Pulse.
 
 ### Fuera de alcance
 
@@ -73,10 +72,10 @@ Cada indicador se expresará en una escala relativa de 0 a 100 respecto de las z
 |---|---|
 | Definición de zonas, fuentes y metodología | Cliente valida por escrito el nivel geográfico, las categorías DENUE y las reglas de puntuación antes del análisis definitivo. |
 | Ranking e indicadores | Al menos 10 zonas; puntaje de 0 a 100, indicador de demanda, conteos separados de farmacias y unidades de salud, y explicación de los factores que influyen en cada resultado. |
-| Mapa | Se abre con instrucciones sencillas y permite al fundador o a un integrante del equipo localizar una zona e interpretar sus resultados en menos de 5 minutos, sin asistencia técnica. |
+| Mapa | Se abre con instrucciones sencillas y permite a un integrante del equipo localizar una zona e interpretar sus resultados en menos de 5 minutos, sin asistencia técnica. |
 | Repositorio de GitHub | Incluye el código, los datos públicos usados y un README en español; una persona distinta del autor puede reproducir el análisis siguiendo el README en menos de 1 hora. |
 | Resumen ejecutivo | Máximo 2 páginas; presenta la recomendación, sus razones, limitaciones y próximos pasos sugeridos. |
-| Presentación de resultados | Sesión de presentación al fundador y su equipo, con oportunidad para preguntas. |
+| Presentación de resultados | Sesión de presentación al equipo de Pharmacy Pulse, con oportunidad para preguntas. |
 
 Los criterios se verificarán en una revisión final con el cliente. Los cambios que amplíen las zonas, las fuentes o los entregables requerirán acuerdo de ambas partes sobre su efecto en costo y fecha.
 
@@ -115,19 +114,20 @@ Se propone una reunión de arranque, una revisión de avance por fase y una pres
 
 ## 7. Presupuesto y costos de operación
 
-El presupuesto máximo indicado por el cliente es de **$120,000 MXN**. La distribución siguiente es únicamente una referencia para organizar el trabajo y deberá validarse en la propuesta económica definitiva; no representa una cotización aceptada.
+El presupuesto máximo indicado por el cliente es de **$120,000 MXN**. La estimación considera aproximadamente un mes de trabajo del equipo, con dedicación parcial distribuida entre sus cuatro integrantes. Las horas y tarifas son supuestos de planeación que deberán validarse en la propuesta económica definitiva; no representan una cotización aceptada.
 
-| Partida de referencia | Monto de referencia |
-|---|---:|
-| Coordinación y gestión del proyecto | $12,000 MXN |
-| Revisión y preparación de datos | $28,000 MXN |
-| Indicadores, metodología y ranking | $30,000 MXN |
-| Mapa y revisión de usabilidad | $20,000 MXN |
-| Repositorio, reproducibilidad y documentación | $16,000 MXN |
-| Resumen ejecutivo y presentación final | $14,000 MXN |
-| **Total máximo de referencia** | **$120,000 MXN** |
+| Integrante / partida | Horas estimadas | Tarifa estimada | Importe estimado |
+|---|---:|---:|---:|
+| Brisa — coordinación y gestión | 60 | $250 MXN/h | $15,000 MXN |
+| Ana Pau — análisis y preparación de datos | 140 | $250 MXN/h | $35,000 MXN |
+| Pam — redacción y documentación | 100 | $200 MXN/h | $20,000 MXN |
+| Javier — mapa y revisión técnica | 140 | $250 MXN/h | $35,000 MXN |
+| **Subtotal del equipo (440 horas)** |  |  | **$105,000 MXN** |
+| AWS durante implementación (configuración y primer mes, estimado) |  |  | $1,000 MXN |
+| Reserva para variaciones de costos |  |  | $14,000 MXN |
+| **Total máximo de referencia** |  |  | **$120,000 MXN** |
 
-La propuesta económica definitiva deberá indicar si los impuestos están incluidos y confirmar que el costo total no excede el límite autorizado. Se priorizarán herramientas y formatos que no requieran suscripciones: el costo de operación mensual posterior a la entrega deberá ser de $2,000 MXN o menos, idealmente $0. Cualquier servicio de pago deberá aprobarse previamente.
+Para la operación posterior se estima un costo recurrente de AWS de **$300–$1,000 MXN al mes**, sujeto al tráfico, almacenamiento, región, tipo de cambio e impuestos. El supuesto es publicar el mapa y sus archivos como contenido estático en servicios administrados como Amazon S3 y CloudFront, sin mantener un servidor encendido; el dominio, si se requiere, se cotizará por separado y deberá aprobarse antes de contratarse. El gasto mensual deberá mantenerse por debajo del máximo de **$2,000 MXN** indicado en el RFP. La estimación no es una cotización de AWS ni presupone que aplique una capa gratuita. La propuesta económica definitiva deberá confirmar impuestos y costos aplicables, y cualquier servicio de pago o gasto que rebase la reserva deberá aprobarse previamente.
 
 ## 8. Supuestos, riesgos y mitigación
 
