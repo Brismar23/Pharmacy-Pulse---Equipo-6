@@ -5,10 +5,8 @@
 | Dato | Detalle |
 |---|---|
 | **Cliente** | Pharmacy Pulse |
-| **Contacto del cliente** | Caleb Aguilar Camargo, fundador |
 | **Equipo propuesto** | Brisa (liderazgo del proyecto), Ana Pau (análisis de datos), Pam (redacción y documentación) y Javier (mapa y revisión técnica) |
 | **Fecha objetivo de entrega** | 29 de enero de 2027 |
-| **Versión** | Borrador basado en el RFP de Equipo 7, publicado el 6 de octubre de 2026 |
 
 > Este documento concreta el alcance solicitado en el RFP. Las decisiones que el RFP deja abiertas —como el nivel geográfico, las categorías de competencia y las ponderaciones del puntaje— deberán confirmarse con Pharmacy Pulse antes del análisis. El precio desglosado es una distribución presupuestal de referencia, no una cotización aprobada.
 
