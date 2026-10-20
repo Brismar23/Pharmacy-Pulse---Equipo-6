@@ -264,7 +264,7 @@ La ejecución inicia tras la adjudicación y la confirmación escrita del alcanc
 
 | Por Pharmacy Pulse | Por el equipo del proyecto |
 |---|---|
-| Nombre: __________________________ | **Brisa Mariana Gómez Luna | Karen Pamela Rico Juárez** |
-| Cargo: ___________________________ | Project Lead | Project Owner | 
+| Nombre: __________________________ | Nombre: _________________________  | 
+| Cargo: ___________________________ | Cargo: ___________________________ | 
 | Fecha: ___________________________ | Fecha: ___________________________ |
 | Firma: ___________________________ | Firma: ___________________________ |
