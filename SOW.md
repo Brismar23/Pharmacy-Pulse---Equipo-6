@@ -6,8 +6,7 @@
 |---|---|
 | **Cliente** | Pharmacy Pulse |
 | **Contacto del cliente** | Caleb Aguilar Camargo |
-| **Project Owner** | **Karen Pamela Rico Juárez** |
-| **Equipo propuesto** | Karen Pamela Rico Juárez, Brisa Mariana Gómez Luna, González Frías Ana Paula y Javier de Jesus Infante Martínez |
+| **Gobierno** | Karen Pamela Rico Juárez, Brisa Mariana Gómez Luna, González Frías Ana Paula y Javier de Jesus Infante Martínez |
 | **Fecha objetivo de entrega** | 29 de enero de 2027 |
 | **Presupuesto máximo de referencia** | $120,000 MXN |
 
