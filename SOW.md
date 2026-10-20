@@ -6,150 +6,266 @@
 |---|---|
 | **Cliente** | Pharmacy Pulse |
 | **Contacto del cliente** | Caleb Aguilar Camargo |
-| **Equipo propuesto** | Brisa (liderazgo del proyecto), Ana Pau (análisis de datos), Pam (redacción y documentación) y Javier (mapa y revisión técnica) |
+| **Project Owner** | **Karen Pamela Rico Juárez** |
+| **Equipo propuesto** | Karen Pamela Rico Juárez, Brisa Mariana Gómez Luna, González Frías Ana Paula y Javier de Jesus Infante Martínez |
 | **Fecha objetivo de entrega** | 29 de enero de 2027 |
+| **Presupuesto máximo de referencia** | $120,000 MXN |
 
-> Este documento concreta el alcance solicitado en el RFP. Las decisiones que el RFP deja abiertas —como el nivel geográfico, las categorías de competencia y las ponderaciones del puntaje— deberán confirmarse con Pharmacy Pulse antes del análisis. El precio desglosado es una distribución presupuestal de referencia, no una cotización aprobada.
+> Esta versión fortalece la SOW original con elementos de evaluación, trazabilidad, control de calidad y reproducibilidad. Las decisiones que el RFP deja abiertas —unidad geográfica, categorías DENUE, tratamiento de unidades de salud y ponderaciones— deberán validarse con Pharmacy Pulse antes de calcular el ranking definitivo.
 
-## 1. Propósito y objetivos
+## 1. Resumen ejecutivo
 
-Pharmacy Pulse aún no tiene sucursales ni datos propios de ventas. El proyecto analizará datos públicos para comparar zonas de seis alcaldías de la Ciudad de México e identificar dónde convendría explorar la apertura de la primera sucursal en 2027. El resultado será una recomendación relativa entre las zonas estudiadas, no una garantía de ventas ni una selección de un local comercial específico.
+Pharmacy Pulse planea abrir su primera sucursal en la Ciudad de México durante 2027 y aún no cuenta con historial propio de ventas, clientes o desempeño por ubicación. La propuesta plantea un análisis reproducible basado en datos públicos del INEGI para priorizar zonas dentro de Benito Juárez, Coyoacán, Tlalpan, Iztapalapa, Gustavo A. Madero y Álvaro Obregón.
 
-Al cierre, el proyecto deberá:
+La solución combinará variables de demanda potencial, estructura demográfica, ingreso disponible cuando exista a un nivel geográfico compatible, acceso o proximidad a servicios de salud y presión competitiva observada en DENUE. Los indicadores serán normalizados en una escala 0–100 y consolidados en un **Índice de Potencial de Apertura (IPA)** interpretable. El resultado final será un ranking de al menos 10 zonas, acompañado de explicación de los factores que impulsan o reducen el puntaje, mapa de consulta, documentación y repositorio reproducible.
 
-1. Entregar un ranking de al menos 10 zonas, cada una con un puntaje de potencial de 0 a 100 y una explicación comprensible.
-2. Mostrar un indicador de demanda y conteos de farmacias y unidades de salud para las zonas del ranking.
-3. Permitir que el equipo consulte y entienda los resultados en un mapa en menos de 5 minutos, sin ayuda técnica.
-4. Permitir que una persona siga las instrucciones del repositorio y repita el análisis en menos de 1 hora.
+La recomendación se presentará como **priorización relativa para orientar una siguiente fase de validación comercial**, no como garantía de ventas, rentabilidad ni selección de un local específico.
 
-## 2. Alcance del trabajo
+## 2. Objetivo general y objetivos específicos
+
+### Objetivo general
+Identificar y priorizar las zonas con mayor potencial relativo para explorar la apertura de la primera sucursal de Pharmacy Pulse mediante un modelo transparente y reproducible sustentado principalmente en información pública del INEGI.
+
+### Objetivos específicos
+1. Comparar zonas con una metodología homogénea y trazable.
+2. Construir un indicador de demanda potencial y un indicador de presión competitiva.
+3. Generar un ranking de al menos 10 zonas con puntaje 0–100 y explicación de los principales impulsores.
+4. Mostrar farmacias y unidades de salud de forma separada para evitar interpretaciones ambiguas.
+5. Habilitar una consulta visual en mapa comprensible para usuarios no técnicos.
+6. Permitir que un tercero reproduzca el análisis siguiendo el README en menos de una hora, sujeto a disponibilidad de las fuentes originales.
+7. Documentar limitaciones, supuestos, decisiones metodológicas y sensibilidad del ranking.
+
+## 3. Alineación directa con necesidades N1–N5 del RFP
+
+| Necesidad | Respuesta de la propuesta | Evidencia de cumplimiento |
+|---|---|---|
+| **N1. Identificar zonas con mayor potencial** | IPA 0–100 y ranking de al menos 10 zonas | Archivo de resultados, tabla de ranking y resumen ejecutivo |
+| **N2. Medir demanda** | Indicadores de población, edades, ingreso y acceso/proximidad a salud, según compatibilidad geográfica | Diccionario de variables, tabla de indicadores y metodología |
+| **N3. Medir competencia** | Conteo DENUE de farmacias y unidades de salud, reportados por separado | Dataset procesado, categorías DENUE documentadas y mapa |
+| **N4. Mapa fácil de consultar** | Visualización geográfica con zonas, puntaje y variables clave | Prueba de uso con tiempo objetivo menor a 5 minutos |
+| **N5. Repetir y revisar el análisis** | Repositorio estructurado, dependencias, scripts/notebooks y README | Prueba de reproducibilidad por una persona distinta del autor |
+
+## 4. Alcance del trabajo
 
 ### Incluye
-
-- Delimitar y comparar zonas dentro de Benito Juárez, Coyoacán, Tlalpan, Iztapalapa, Gustavo A. Madero y Álvaro Obregón.
-- Identificar, descargar y documentar datos públicos pertinentes del INEGI:
-  - Censo de Población y Vivienda para población y estructura por edades.
-  - DENUE para ubicar y contar farmacias y unidades de salud.
-  - Datos públicos disponibles de ingresos por zona, indicando su fuente, fecha y nivel geográfico.
-- Revisar cobertura, fechas, definiciones y limitaciones de las fuentes; preparar los datos para el análisis y conservar la trazabilidad de las transformaciones.
-- Proponer y documentar una metodología de puntaje interpretable que combine demanda y presión competitiva, sin presentarla como pronóstico de ventas.
-- Generar el ranking, sus indicadores y sus explicaciones.
-- Crear un mapa sencillo para consultar y comparar las zonas.
-- Preparar un repositorio de GitHub con datos públicos utilizados, código y un README en español que explique cómo repetir el análisis.
-- Entregar un resumen ejecutivo de máximo 2 páginas y presentar los resultados al equipo de Pharmacy Pulse.
+- Delimitar y comparar zonas dentro de las seis alcaldías definidas por el cliente.
+- Identificar, descargar y documentar fuentes públicas pertinentes del INEGI, incluyendo Censo de Población y Vivienda y DENUE.
+- Evaluar la disponibilidad de indicadores de ingreso al nivel geográfico seleccionado; si no existe compatibilidad, documentar la limitación y solicitar aprobación antes de cualquier sustitución.
+- Preparar, limpiar, homologar y validar datos con trazabilidad de transformaciones.
+- Definir y documentar una metodología de puntuación interpretable.
+- Generar ranking, indicadores, explicaciones, mapa y resumen ejecutivo.
+- Documentar el repositorio de GitHub para facilitar auditoría y reproducción.
+- Ejecutar controles de calidad de datos y análisis de sensibilidad de ponderaciones.
 
 ### Fuera de alcance
+- Selección, inspección, renta o negociación de locales específicos.
+- Licencias, permisos sanitarios o trámites regulatorios.
+- Recomendaciones de surtido, inventario, precios, personal o estrategia comercial.
+- Proyecciones financieras detalladas, pronósticos de ventas o rentabilidad.
+- Compra de datos privados de movilidad, renta, tarjetas, geolocalización o afluencia.
+- Garantizar que la zona mejor calificada resulte rentable.
 
-- Buscar, inspeccionar, seleccionar, arrendar o negociar locales específicos.
-- Tramitar licencias, permisos o autorizaciones sanitarias.
-- Recomendar surtido, inventario, precios, personal o estrategia comercial.
-- Elaborar proyecciones financieras detalladas, estimaciones de ventas o rentabilidad.
-- Obtener datos privados de clientes, ventas, afluencia peatonal, rentas o establecimientos no registrados.
-- Garantizar que la zona mejor calificada sea rentable o que los datos públicos reflejen la situación actual en campo.
+## 5. Fuentes de datos, trazabilidad y calidad
 
-## 3. Fuentes de datos y metodología
+### Fuentes prioritarias
+| Fuente | Uso esperado | Validaciones mínimas |
+|---|---|---|
+| **Censo de Población y Vivienda (INEGI)** | Población y estructura por edades | Año de referencia, cobertura, unidad geográfica y valores faltantes |
+| **DENUE (INEGI)** | Farmacias y unidades de salud | Fecha de actualización, categorías económicas, georreferencia y duplicados |
+| **Indicadores públicos de ingreso compatibles** | Aproximación de capacidad económica | Fuente, año, cobertura y compatibilidad con la unidad de análisis |
+| **Marco geoestadístico INEGI** | Límites y relación espacial | Versión, claves geográficas y correspondencia con indicadores |
 
-Se priorizarán las fuentes públicas del INEGI indicadas en el RFP. Para cada conjunto se anotarán la fuente, fecha de publicación o referencia temporal, variables usadas, cobertura geográfica y limitaciones. Si los datos de ingresos no están disponibles con el detalle geográfico acordado, se informará al cliente y se propondrá una alternativa antes de sustituirlos.
+### Matriz de calidad de datos
+Cada fuente se registrará en una ficha de control con: procedencia, URL/origen, fecha de descarga, fecha de referencia, unidad geográfica, variables utilizadas, cobertura, porcentaje de valores faltantes, transformaciones aplicadas, limitaciones y responsable de validación.
 
-### Unidad geográfica y competencia
+Se recomienda reportar una **etiqueta de confianza del dato** (Alta / Media / Baja) basada en actualidad, completitud y compatibilidad geográfica. Esta etiqueta no modifica automáticamente el IPA; sirve para transparentar la robustez de la evidencia.
 
-El nivel de análisis (alcaldía, colonia o AGEB) se definirá durante la validación inicial. Para alcanzar al menos 10 zonas dentro de las seis alcaldías y permitir la comparación, se propone evaluar AGEB urbanas cuando las fuentes tengan cobertura compatible. La elección definitiva y cualquier agrupación de unidades deberán aprobarse antes de calcular el ranking.
+## 6. Metodología analítica
 
-El equipo y el cliente acordarán qué categorías y actividades del DENUE se tratarán como competencia, así como la forma de asociar establecimientos con cada zona. El resultado reportará por separado los conteos de farmacias y unidades de salud y dejará explícitas las categorías incluidas. No se asumirá que el DENUE contiene todos los consultorios, tiendas con venta de medicamentos, hospitales o clínicas privadas.
+### 6.1 Unidad geográfica
+El nivel de análisis definitivo se aprobará durante el arranque. Se propone utilizar **AGEB urbana** cuando exista compatibilidad suficiente entre fuentes porque permite comparar más de 10 zonas con mayor granularidad que la alcaldía. Si alguna variable solo existe a un nivel más agregado, no se imputará ni redistribuirá de forma artificial sin validación explícita.
 
-### Puntaje propuesto
+### 6.2 Definición de competencia
+Antes del cálculo final se documentarán los códigos/clases DENUE incluidos como:
+- Farmacias u otros establecimientos de venta de medicamentos definidos como competencia directa.
+- Unidades de salud, reportadas de manera separada.
 
-Como punto de partida sujeto a aprobación del cliente, se propone un puntaje compuesto por:
+Las unidades de salud pueden comportarse como generadores de demanda, contexto sanitario o presión competitiva dependiendo del tipo de establecimiento. Por ello, **su tratamiento en el IPA deberá validarse con el cliente** y no se asumirá automáticamente.
 
-- **Demanda estimada (70 %):** población (30 %), composición por edades (15 %), ingresos (15 %) y acceso a servicios de salud (10 %).
-- **Presión competitiva (30 %):** conteos de farmacias y unidades de salud, con mayor presión competitiva reduciendo el puntaje.
+### 6.3 Normalización
+Los indicadores comparables se convertirán a escala 0–100 utilizando una regla documentada, por ejemplo normalización min–max dentro del universo analizado:
 
-Cada indicador se expresará en una escala relativa de 0 a 100 respecto de las zonas comparadas. El puntaje final también irá de 0 a 100. El informe explicará los pesos, las reglas de cálculo y qué significan; el cliente deberá aprobarlos antes de la clasificación final. Este resultado sirve para priorizar investigación, no equivale a una probabilidad de éxito. Si una variable no es comparable o no está disponible, su tratamiento se acordará y documentará, sin inventar datos.
+`Indicador_norm = 100 × (x - min(x)) / (max(x) - min(x))`
 
-## 4. Entregables y criterios de aceptación
+Para variables donde un valor alto represente menor atractivo (por ejemplo, mayor presión competitiva), se utilizará la escala inversa:
 
-| Entregable | Criterio de aceptación |
-|---|---|
-| Definición de zonas, fuentes y metodología | Cliente valida por escrito el nivel geográfico, las categorías DENUE y las reglas de puntuación antes del análisis definitivo. |
-| Ranking e indicadores | Al menos 10 zonas; puntaje de 0 a 100, indicador de demanda, conteos separados de farmacias y unidades de salud, y explicación de los factores que influyen en cada resultado. |
-| Mapa | Se abre con instrucciones sencillas y permite a un integrante del equipo localizar una zona e interpretar sus resultados en menos de 5 minutos, sin asistencia técnica. |
-| Repositorio de GitHub | Incluye el código, los datos públicos usados y un README en español; una persona distinta del autor puede reproducir el análisis siguiendo el README en menos de 1 hora. |
-| Resumen ejecutivo | Máximo 2 páginas; presenta la recomendación, sus razones, limitaciones y próximos pasos sugeridos. |
-| Presentación de resultados | Sesión de presentación al equipo de Pharmacy Pulse, con oportunidad para preguntas. |
+`Indicador_inverso = 100 - Indicador_norm`
 
-Los criterios se verificarán en una revisión final con el cliente. Los cambios que amplíen las zonas, las fuentes o los entregables requerirán acuerdo de ambas partes sobre su efecto en costo y fecha.
+### 6.4 Índice de Potencial de Apertura (IPA)
+Como punto de partida sujeto a aprobación:
 
-## 5. Calendario propuesto
+`IPA = 0.30(Población) + 0.15(Composición por edades) + 0.15(Ingreso) + 0.10(Acceso/contexto de salud) + 0.30(Presión competitiva inversa)`
 
-Las fechas del proceso de selección son las del RFP. Las fases de ejecución siguientes son propuestas y dependen de la adjudicación del 9 de noviembre de 2026 y de la disponibilidad del cliente.
+Equivale a una estructura general de **70 % demanda/contexto y 30 % presión competitiva**. Los pesos son hipótesis de decisión, no parámetros estadísticos aprendidos de ventas históricas, por lo que deberán aprobarse antes del ranking final.
+
+### 6.5 Análisis de sensibilidad — complemento recomendado
+Para fortalecer la evaluación, se probarán escenarios alternativos de ponderación alrededor del modelo base. El objetivo será observar si las zonas líderes permanecen en posiciones similares cuando cambian razonablemente los pesos.
+
+Se reportará:
+- Posición de cada zona en el escenario base.
+- Rango de posiciones observado en escenarios alternativos.
+- Zonas **robustas** (mantienen posición alta) y zonas **sensibles** (cambian significativamente).
+
+Esto reduce el riesgo de presentar como concluyente un ranking que dependa excesivamente de una ponderación subjetiva.
+
+## 7. Entregables y criterios de aceptación
+
+| Entregable | Criterio de aceptación | Evidencia |
+|---|---|---|
+| Definición metodológica | Cliente valida unidad geográfica, categorías DENUE, tratamiento de salud y ponderaciones | Registro de decisión / acta breve |
+| Datos preparados y diccionario | Fuentes, variables, fechas y transformaciones documentadas | Carpeta `data/` + diccionario |
+| Ranking e indicadores | Al menos 10 zonas, IPA 0–100 y explicación de factores | CSV/tabla + resumen |
+| Análisis de sensibilidad | Se muestran cambios de posición bajo escenarios razonables | Tabla de estabilidad |
+| Mapa | Usuario no técnico localiza e interpreta una zona en <5 min | Prueba de uso |
+| Repositorio GitHub | Código, datos públicos permitidos, dependencias y README | Prueba de reproducción <1 h |
+| Resumen ejecutivo | Máximo 2 páginas, recomendación, razones, limitaciones y próximos pasos | Documento final |
+| Presentación | Sesión final con narrativa ejecutiva y preguntas | Presentación y minuta de cierre |
+
+## 8. Matriz de evaluación del RFP — complemento para maximizar puntuación
+
+| Criterio del RFP | Peso | Cómo lo cubre esta propuesta | Evidencia que conviene mostrar |
+|---|---:|---|---|
+| **Respuesta a N1–N5** | 35 % | Matriz de trazabilidad, ranking, mapa y reproducibilidad | Sección 3 + demo final |
+| **Uso adecuado y claro de INEGI** | 25 % | Fuentes, control de calidad, granularidad y limitaciones | Fichas de fuente + diccionario |
+| **Costo total** | 20 % | Presupuesto dentro del máximo de $120,000 MXN | Tabla de costos y supuestos |
+| **Calidad del plan y tiempos** | 10 % | Fases, hitos, gates de decisión y criterios de aceptación | Cronograma + calendario de revisiones |
+| **Manejo de riesgos** | 10 % | Registro de riesgos, mitigaciones y sensibilidad | Matriz de riesgos + análisis de estabilidad |
+
+### Evidencias adicionales recomendadas para la evaluación
+1. **Matriz de trazabilidad requisito → entregable → evidencia.** Facilita al evaluador comprobar que ninguna necesidad quedó sin respuesta.
+2. **Diccionario de datos y bitácora de transformaciones.** Eleva la auditabilidad del uso de INEGI.
+3. **Prueba de reproducibilidad independiente.** Una persona distinta del autor ejecuta el flujo siguiendo únicamente el README.
+4. **Análisis de sensibilidad.** Demuestra que el ranking fue cuestionado y no solo calculado.
+5. **Registro de decisiones metodológicas.** Documenta por qué se eligieron AGEB, categorías DENUE, pesos y cualquier sustitución de variables.
+6. **Semáforo de calidad/confianza de datos.** Ayuda a distinguir resultados sólidos de resultados que requieren validación en campo.
+7. **Criterios de salida para la siguiente fase.** Define qué zonas deben pasar a due diligence comercial sin confundir el estudio con una selección de local.
+
+## 9. Estructura propuesta del repositorio
+
+```text
+Pharmacy-Pulse---Equipo-6/
+├── README.md
+├── SOW.md
+├── requirements.txt              # o environment.yml
+├── .gitignore
+├── .github/
+│   └── CODEOWNERS
+├── data/
+│   ├── raw/                      # datos públicos permitidos / instrucciones de descarga
+│   ├── processed/
+│   └── data_dictionary.md
+├── src/
+│   ├── 01_extract.py
+│   ├── 02_clean.py
+│   ├── 03_indicators.py
+│   ├── 04_scoring.py
+│   └── 05_map.py
+├── notebooks/                    # solo exploración; lógica final en src/
+├── outputs/
+│   ├── ranking.csv
+│   ├── sensitivity.csv
+│   └── map/
+├── docs/
+│   ├── methodology.md
+│   ├── decision_log.md
+│   ├── risks.md
+│   └── executive_summary.pdf
+└── tests/
+    └── data_quality_checks.py
+```
+
+## 10. Gobierno, roles y responsabilidades
+
+| Integrante | Rol formal | Responsabilidades |
+|---|---|---|
+| **Karen Pamela Rico Juárez** | **Project Owner / Gobierno y documentación** | Visión del entregable, trazabilidad documental, README, resumen ejecutivo, control de cambios y aceptación interna |
+| **Brisa Mariana Gómez Luna** | **Project Lead / Gestión del proyecto** | Calendario, coordinación, reuniones, dependencias, entregables y comunicación con el cliente |
+| **González Frías Ana Paula** | **Data Analyst / Analítica y preparación de datos** | Fuentes, limpieza, homologación, indicadores, normalización, scoring y sensibilidad |
+| **Javier de Jesus Infante Martínez** | **Geospatial & Technical Reviewer / Mapa y revisión técnica** | Mapa, revisión técnica independiente, control de reproducibilidad y soporte de integración |
+
+### Gobierno mínimo del proyecto
+- Las decisiones que afecten alcance, scoring, fuentes o fecha se registrarán en `docs/decision_log.md`.
+- La versión final del scoring requiere aprobación documentada antes de publicar el ranking definitivo.
+- Los cambios de alcance posteriores a la validación inicial deberán indicar impacto en costo y calendario.
+- El repositorio público no incluirá información confidencial del cliente.
+
+## 11. Calendario propuesto
 
 | Fase | Fechas propuestas | Actividades y salida |
 |---|---|---|
-| Inicio y definición | 10–20 de noviembre de 2026 | Reunión de arranque; confirmar zonas, nivel geográfico, categorías DENUE, metodología, responsables y accesos. |
-| Fuentes y preparación | 23 de noviembre–4 de diciembre de 2026 | Recopilar fuentes, revisar cobertura y antigüedad, preparar datos y reportar vacíos. |
-| Análisis y mapa | 7 de diciembre de 2026–8 de enero de 2027 | Calcular indicadores, aplicar puntaje aprobado, preparar ranking y construir el mapa. |
-| Revisión con cliente | 11–15 de enero de 2027 | Revisar resultados preliminares, registrar observaciones y acordar correcciones dentro del alcance. |
-| Entrega y presentación | 18–29 de enero de 2027 | Publicar los entregables, validar criterios de aceptación y presentar resultados. |
+| Inicio y definición | 10–20 nov 2026 | Kickoff; confirmar unidad geográfica, categorías DENUE, pesos, responsables y criterios de aceptación |
+| Fuentes y preparación | 23 nov–4 dic 2026 | Recopilar fuentes, calidad, homologación, diccionario y reporte de vacíos |
+| Análisis y prototipo | 7 dic 2026–8 ene 2027 | Indicadores, IPA, sensibilidad, ranking preliminar y mapa |
+| Revisión con cliente | 11–15 ene 2027 | Revisar resultados, decisiones pendientes y correcciones dentro de alcance |
+| Entrega y presentación | 18–29 ene 2027 | Repositorio final, resumen, pruebas de aceptación y presentación |
 
-Las fechas intermedias se ajustarán de común acuerdo si la disponibilidad de datos, los periodos vacacionales o las revisiones del cliente afectan el calendario. La fecha objetivo final del RFP es el 29 de enero de 2027.
+### Gates de decisión
+- **Gate 1:** aprobación de unidad geográfica y fuentes.
+- **Gate 2:** aprobación de categorías DENUE y ponderaciones.
+- **Gate 3:** validación de ranking preliminar y sensibilidad.
+- **Gate 4:** aceptación final contra criterios documentados.
 
-## 6. Responsabilidades y comunicación
-
-### Equipo del proyecto
-
-- **Brisa, líder del proyecto:** coordinar calendario, decisiones, entregas y comunicación.
-- **Ana Pau, análisis de datos:** revisar y preparar las fuentes y calcular los indicadores y el ranking.
-- **Pam, redacción y documentación:** documentar metodología, limitaciones, README y resumen ejecutivo.
-- **Javier, mapa y revisión técnica:** preparar el mapa y revisar la reproducibilidad técnica.
-
-### Pharmacy Pulse
-
-- Nombrar una persona responsable de aprobar decisiones y entregables.
-- Facilitar oportunamente la definición de zonas prioritarias y resolver las preguntas sobre el uso previsto del análisis.
-- Revisar y aprobar el nivel geográfico, las categorías de competencia y las ponderaciones antes del cálculo definitivo.
-- Consolidar comentarios y devolverlos en las fechas acordadas.
-- Compartir cualquier plan de negocio o información interna solo bajo un acuerdo de confidencialidad; dicha información no se incluirá en el repositorio público.
-
-Se propone una reunión de arranque, una revisión de avance por fase y una presentación final. Las aprobaciones y cambios de alcance deberán quedar documentados por escrito.
-
-## 7. Presupuesto y costos de operación
-
-El presupuesto máximo indicado por el cliente es de **$120,000 MXN**. La estimación considera aproximadamente un mes de trabajo del equipo, con dedicación parcial distribuida entre sus cuatro integrantes. Las horas y tarifas son supuestos de planeación que deberán validarse en la propuesta económica definitiva; no representan una cotización aceptada.
+## 12. Presupuesto y costos de operación
 
 | Integrante / partida | Horas estimadas | Tarifa estimada | Importe estimado |
 |---|---:|---:|---:|
-| Brisa — coordinación y gestión | 60 | $250 MXN/h | $15,000 MXN |
-| Ana Pau — análisis y preparación de datos | 140 | $250 MXN/h | $35,000 MXN |
-| Pam — redacción y documentación | 100 | $200 MXN/h | $20,000 MXN |
-| Javier — mapa y revisión técnica | 140 | $250 MXN/h | $35,000 MXN |
-| **Subtotal del equipo (440 horas)** |  |  | **$105,000 MXN** |
-| AWS durante implementación (configuración y primer mes, estimado) |  |  | $1,000 MXN |
-| Reserva para variaciones de costos |  |  | $14,000 MXN |
+| Brisa Mariana Gómez Luna — coordinación y gestión | 60 | $250 MXN/h | $15,000 MXN |
+| González Frías Ana Paula — análisis y preparación de datos | 140 | $250 MXN/h | $35,000 MXN |
+| Karen Pamela Rico Juárez — gobierno, documentación y entregables | 100 | $200 MXN/h | $20,000 MXN |
+| Javier de Jesus Infante Martínez — mapa y revisión técnica | 140 | $250 MXN/h | $35,000 MXN |
+| **Subtotal equipo (440 h)** |  |  | **$105,000 MXN** |
+| AWS durante implementación (estimado) |  |  | $1,000 MXN |
+| Reserva para variaciones |  |  | $14,000 MXN |
 | **Total máximo de referencia** |  |  | **$120,000 MXN** |
 
-Para la operación posterior se estima un costo recurrente de AWS de **$300–$1,000 MXN al mes**, sujeto al tráfico, almacenamiento, región, tipo de cambio e impuestos. El supuesto es publicar el mapa y sus archivos como contenido estático en servicios administrados como Amazon S3 y CloudFront, sin mantener un servidor encendido; el dominio, si se requiere, se cotizará por separado y deberá aprobarse antes de contratarse. El gasto mensual deberá mantenerse por debajo del máximo de **$2,000 MXN** indicado en el RFP. La estimación no es una cotización de AWS ni presupone que aplique una capa gratuita. La propuesta económica definitiva deberá confirmar impuestos y costos aplicables, y cualquier servicio de pago o gasto que rebase la reserva deberá aprobarse previamente.
+El costo operativo mensual deberá mantenerse por debajo del máximo indicado en el RFP. Cualquier servicio de pago, dominio o cambio de arquitectura deberá aprobarse antes de contratarse.
 
-## 8. Supuestos, riesgos y mitigación
+## 13. Riesgos, supuestos y mitigaciones
 
-| Supuesto o riesgo | Tratamiento |
-|---|---|
-| Algunas fuentes pueden tener varios años de antigüedad. | Mostrar la fecha de referencia y advertir que la situación actual puede diferir. |
-| No existen datos propios de ventas ni clientes. | Usar indicadores públicos como aproximaciones comparativas, no como pronósticos. |
-| Ingresos, población y establecimientos pueden estar publicados a distintos niveles geográficos o periodos. | Verificar compatibilidad antes de puntuar; documentar y acordar cualquier alternativa. |
-| El DENUE puede no registrar todos los competidores o servicios privados. | Describir las categorías y exclusiones; reportar los conteos como cobertura del directorio, no como censo perfecto. |
-| El flujo peatonal, las rentas y algunos establecimientos no registrados no están disponibles. | Excluirlos del cálculo y mencionarlos como factores que el cliente deberá investigar en una fase posterior. |
-| El cliente tarda en resolver decisiones o revisar resultados. | Acordar responsables y fechas de revisión al inicio; ajustar hitos intermedios de común acuerdo. |
-| Un puntaje relativo puede interpretarse como garantía de éxito. | Explicar los pesos, limitaciones y carácter comparativo en el mapa y los informes. |
+| Riesgo / supuesto | Impacto | Mitigación |
+|---|---|---|
+| Fuentes con distinta antigüedad | Comparabilidad temporal | Mostrar fechas y advertencias; no mezclar periodos sin documentarlo |
+| Ausencia de ventas propias | No se puede calibrar contra conversión real | Tratar el IPA como priorización relativa, no pronóstico |
+| Ingreso no disponible a granularidad compatible | Pérdida de una variable del modelo | Escalar decisión al cliente antes de sustituir; recalcular pesos aprobados |
+| Cobertura incompleta de DENUE | Subestimación de competencia/contexto | Declarar clases incluidas, fecha y limitaciones |
+| Tratamiento ambiguo de unidades de salud | Sesgo del IPA | Reportarlas por separado y validar su papel antes de incorporarlas |
+| Ranking sensible a pesos | Recomendación inestable | Análisis de sensibilidad y etiqueta de estabilidad |
+| Retrasos en aprobaciones | Afectación del cronograma | Gates, responsables y fecha límite de comentarios |
+| Confusión entre score y rentabilidad | Decisión de negocio incorrecta | Disclaimer visible y siguiente fase de validación en campo |
 
-El repositorio público contendrá únicamente datos públicos, código y resultados autorizados. No se incorporarán datos confidenciales del negocio.
+## 14. KPIs de éxito y cierre
 
-## 9. Aprobación
+- **Cobertura:** 100 % de zonas seleccionadas procesadas con la misma metodología.
+- **Trazabilidad:** 100 % de variables finales con fuente, fecha y transformación documentada.
+- **Ranking:** mínimo 10 zonas con IPA 0–100 y explicación.
+- **Usabilidad:** mapa interpretable por usuario no técnico en menos de 5 minutos.
+- **Reproducibilidad:** ejecución por tercero en menos de 1 hora siguiendo el README.
+- **Estabilidad:** resultados de sensibilidad reportados para las zonas finalistas.
+- **Transparencia:** limitaciones y supuestos visibles en mapa, README y resumen ejecutivo.
 
-La ejecución comienza tras la adjudicación y la confirmación por escrito del alcance, calendario, presupuesto y decisiones pendientes descritas en este documento. La aceptación final se realizará contra los criterios de la sección 4.
+## 15. Recomendación de uso del resultado
+
+El ranking deberá utilizarse para seleccionar un grupo reducido de zonas candidatas —por ejemplo, Top 3 o Top 5— que avancen a una segunda fase de **due diligence comercial**. Esa fase, fuera del alcance actual, podría incorporar rentas, flujo peatonal, accesibilidad, seguridad, visibilidad, estacionamiento, oferta inmobiliaria, competencia no registrada y visitas de campo.
+
+De esta forma, el proyecto reduce el espacio de búsqueda con evidencia pública sin atribuir al modelo una precisión que no puede sostener con los datos disponibles.
+
+## 16. Aprobación
+
+La ejecución inicia tras la adjudicación y la confirmación escrita del alcance, calendario, presupuesto y decisiones pendientes. La aceptación final se realizará contra los criterios de la sección 7.
 
 | Por Pharmacy Pulse | Por el equipo del proyecto |
 |---|---|
-| Nombre: ____________________ | Nombre: ____________________ |
-| Cargo: _____________________ | Cargo: _____________________ |
-| Fecha: _____________________ | Fecha: _____________________ |
-| Firma: _____________________ | Firma: _____________________ |
+| Nombre: __________________________ | **Karen Pamela Rico Juárez** |
+| Cargo: ___________________________ | Project Owner |
+| Fecha: ___________________________ | Fecha: ___________________________ |
+| Firma: ___________________________ | Firma: ___________________________ |
