@@ -2,6 +2,8 @@
 
 Diagrama de la plataforma de datos de Pharmacy Pulse en AWS.
 
+![Diagrama de arquitectura de Pharmacy Pulse en AWS](documentacion-diagrama-arquitectura.png)
+
 - **Archivo del diagrama:** [`diagrama-arquitectura.json`](diagrama-arquitectura.json)
 - **Cómo abrirlo:** en [Diagramon](https://github.com/dataengileb/diagramon), abrir `index.html` y usar **Import**.
 - **Fuente:** [`SOW.md`](SOW.md) v2.0, secciones 5 (arquitectura de datos) y 9 (repositorio).
