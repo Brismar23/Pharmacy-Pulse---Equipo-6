@@ -1,0 +1,51 @@
+{
+  "formatVersion": 1,
+  "title": "Pharmacy Pulse - arquitectura en AWS",
+  "meta": { "author": "Equipo 6", "version": "2.0" },
+  "groups": [
+    { "id": "local", "label": "Equipo de datos (local)", "color": "lavanda", "icon": "aws/group-datacenter", "kind": "physical" },
+    { "id": "aws",   "label": "AWS Cloud", "color": "melocoton", "icon": "aws/group-cloud", "kind": "physical" },
+    { "id": "acct",  "label": "Cuenta AWS del proyecto", "color": "melocoton", "icon": "aws/group-account", "kind": "physical", "parent": "aws" },
+    { "id": "reg",   "label": "Region (a definir en Gate 1)", "color": "cielo", "icon": "aws/group-region", "kind": "physical", "parent": "acct" },
+    { "id": "lraw",  "label": "Zona raw", "color": "melocoton", "kind": "logical", "parent": "reg", "layer": "bronze" },
+    { "id": "lcln",  "label": "Zona clean", "color": "cielo", "kind": "logical", "parent": "reg", "layer": "silver" },
+    { "id": "lcur",  "label": "Zona curated", "color": "limon", "kind": "logical", "parent": "reg", "layer": "gold" }
+  ],
+  "nodes": [
+    { "id": "inegi",  "label": "INEGI", "type": "external", "sub": "Censo, DENUE, Marco Geoestadistico", "data": ["public"] },
+    { "id": "pipe",   "label": "make pipeline", "type": "compute", "sub": "src/01_extract ... 05_map (Python)", "group": "local" },
+    { "id": "qa",     "label": "Reglas de calidad R1-R8", "type": "function", "sub": "tests/data_quality_checks.py", "group": "local" },
+    { "id": "duck",   "label": "DuckDB", "type": "db", "sub": "Consulta SQL sobre Parquet", "group": "local" },
+    { "id": "map",    "label": "Mapa y ranking", "type": "storage", "sub": "ranking.csv + mapa estatico", "group": "local" },
+
+    { "id": "cfn",    "label": "CloudFormation", "type": "devops", "icon": "aws/cloudformation", "sub": "infra/template.yaml", "group": "acct" },
+    { "id": "iam",    "label": "IAM", "type": "security", "icon": "aws/iam", "sub": "Rol de minimo privilegio", "group": "acct" },
+    { "id": "budget", "label": "AWS Budgets", "type": "monitor", "sub": "Tope USD 5, alerta al 80 %", "group": "acct", "cost": 0 },
+    { "id": "s3raw",  "label": "S3 raw", "type": "storage", "icon": "aws/s3", "sub": "raw/<fuente>/<fecha>, inmutable", "group": "lraw", "cost": 0, "data": ["public"] },
+    { "id": "s3cln",  "label": "S3 clean", "type": "storage", "icon": "aws/s3", "sub": "Parquet tipado", "group": "lcln", "cost": 0, "data": ["public"] },
+    { "id": "s3cur",  "label": "S3 curated", "type": "storage", "icon": "aws/s3", "sub": "Parquet con indicadores e IPA", "group": "lcur", "cost": 0, "data": ["public"] },
+    { "id": "athena", "label": "Athena (opcional)", "type": "db", "icon": "aws/athena", "sub": "Alternativa a DuckDB, sin Glue Crawler", "group": "reg" },
+
+    { "id": "client", "label": "Pharmacy Pulse", "type": "user", "sub": "Ranking de al menos 10 zonas" }
+  ],
+  "edges": [
+    { "from": "inegi", "to": "pipe", "label": "1 descarga CSV/SHP", "encrypted": true, "data": ["public"] },
+    { "from": "pipe", "to": "s3raw", "label": "2 extract", "style": "data", "encrypted": true, "data": ["public"] },
+    { "from": "s3raw", "to": "pipe", "label": "3 clean", "style": "data", "encrypted": true, "data": ["public"] },
+    { "from": "pipe", "to": "s3cln", "label": "4 Parquet", "style": "data", "encrypted": true, "data": ["public"] },
+    { "from": "s3cln", "to": "pipe", "label": "5 indicadores + IPA", "style": "data", "encrypted": true, "data": ["public"] },
+    { "from": "pipe", "to": "s3cur", "label": "6 curated", "style": "data", "encrypted": true, "data": ["public"] },
+    { "from": "qa", "to": "s3cln", "label": "valida", "style": "optional", "encrypted": true },
+    { "from": "qa", "to": "s3cur", "label": "valida", "style": "optional", "encrypted": true },
+    { "from": "pipe", "to": "iam", "label": "asume rol", "encrypted": true },
+    { "from": "cfn", "to": "s3raw", "label": "crea", "style": "optional" },
+    { "from": "cfn", "to": "s3cln", "label": "crea", "style": "optional" },
+    { "from": "cfn", "to": "s3cur", "label": "crea", "style": "optional" },
+    { "from": "cfn", "to": "iam", "label": "crea", "style": "optional" },
+    { "from": "cfn", "to": "budget", "label": "crea", "style": "optional" },
+    { "from": "s3cur", "to": "duck", "label": "7 SQL", "style": "data", "encrypted": true, "data": ["public"] },
+    { "from": "s3cur", "to": "athena", "label": "opcional", "style": "optional", "encrypted": true },
+    { "from": "duck", "to": "map", "label": "8 map" },
+    { "from": "map", "to": "client", "label": "resumen ejecutivo" }
+  ]
+}
