@@ -276,29 +276,29 @@ Convención: carpetas y archivos en minúsculas y sin espacios. El PDF se genera
 
 | Rol / partida | Horas | Tarifa | Importe |
 |---|---:|---:|---:|
-| Project manager y documentación (Brisa) | 60 | $250 MXN/h | $15,000 MXN |
-| Data Engineer de ingesta y plataforma (Javier) | 140 | $250 MXN/h | $35,000 MXN |
-| Data Engineer de transformación (Ana Paula) | 140 | $250 MXN/h | $35,000 MXN |
-| Calidad y gobierno de datos, y mapa (Karen) | 100 | $200 MXN/h | $20,000 MXN |
+| Project manager y documentación | 100 | $200 MXN/h | $20,000 MXN |
+| Data Engineer de ingesta y plataforma | 110 | $250 MXN/h | $27,500 MXN |
+| Data Engineer de transformación | 120 | $250 MXN/h | $30,000 MXN |
+| Calidad y gobierno de datos, y mapa | 110 | $250 MXN/h | $27,500 MXN |
 | **Subtotal equipo (440 h)** | | | **$105,000 MXN** |
-| AWS durante implementación (estimado; el tope con alerta de la cuenta es USD 5) | | | $1,000 MXN |
-| Reserva para variaciones de costos | | | $14,000 MXN |
+| AWS: tope de presupuesto con alerta al 80 % (USD 5 aprox.) | | | $100 MXN |
+| Reserva para variaciones (aprox. 12 %) | | | $14,900 MXN |
 | **Total máximo de referencia** | | | **$120,000 MXN** |
 
 ### 12.1 Horas por persona y por fase
 
-Las 440 h se reparten según el calendario de la sección 11 (unas 10 semanas efectivas, con el receso de fin de año). La estimación considera cerca de un mes de trabajo del equipo con dedicación parcial, distribuido entre los cuatro integrantes: de unas 6 h por semana (Brisa) a unas 14 h por semana (Javier y Ana Paula). El reparto es una propuesta a confirmar en el kickoff, junto con la asignación de roles.
+Las 440 h se reparten según el calendario de la sección 11 (unas 10 semanas efectivas, con el receso de fin de año). Cada integrante dedica cerca de 11 h por semana. El reparto es una propuesta a confirmar en el kickoff, junto con la asignación de roles.
 
 | Fase | Fechas | PM y documentación (Brisa) | Ingesta y plataforma (Javier) | Transformación (Ana Paula) | Calidad y mapa (Karen) | Horas | Importe |
 |---|---|---:|---:|---:|---:|---:|---:|
-| Inicio y hito 1 | 10–20 nov | 10 | 35 | 15 | 10 | 70 | $17,000 |
-| Ingesta y calidad | 23 nov–4 dic | 10 | 45 | 30 | 20 | 105 | $25,250 |
-| Transformación y análisis | 7 dic–8 ene | 10 | 30 | 60 | 30 | 130 | $31,000 |
-| Revisión con cliente | 11–15 ene | 15 | 15 | 20 | 15 | 65 | $15,500 |
-| Entrega y presentación | 18–29 ene | 15 | 15 | 15 | 25 | 70 | $16,250 |
-| **Total** | | **60** | **140** | **140** | **100** | **440** | **$105,000** |
+| Inicio y hito 1 | 10–20 nov | 20 | 30 | 10 | 10 | 70 | $16,500 |
+| Ingesta y calidad | 23 nov–4 dic | 15 | 35 | 20 | 30 | 100 | $24,250 |
+| Transformación y análisis | 7 dic–8 ene | 20 | 15 | 60 | 35 | 130 | $31,500 |
+| Revisión con cliente | 11–15 ene | 20 | 10 | 15 | 15 | 60 | $14,000 |
+| Entrega y presentación | 18–29 ene | 25 | 20 | 15 | 20 | 80 | $18,750 |
+| **Total** | | **100** | **110** | **120** | **110** | **440** | **$105,000** |
 
-La carga se concentra en ingesta y plataforma durante el inicio y la ingesta, y en transformación durante el análisis. La project manager reparte sus 60 h con más peso en la revisión y la entrega, donde pesan el cliente y la documentación.
+La carga se concentra en ingesta y plataforma durante el inicio y la ingesta, y en transformación durante el análisis. La project manager sube en la revisión y la entrega, donde pesan el cliente y la documentación.
 
 ### 12.2 Tarifas frente al mercado (perfil junior)
 
@@ -312,7 +312,7 @@ El equipo es junior, así que la comparación se hace contra perfiles junior y n
 | Freelance junior en Latinoamérica (aprox. USD 22) | aprox. $440 | Lemon.io 2026 |
 | **Tarifa de este SOW** | **$200 a $250** | Sección 12 |
 
-Las tarifas del SOW ($250 la hora de gestión, ingesta y transformación, y $200 la de calidad y gobierno) quedan dentro del rango de un junior en nómina y por debajo del piso de un junior freelance. A $400 la hora, las 440 h valdrían $176,000 y el cliente las recibe por $105,000, un 60 % de ese piso.
+Las tarifas del SOW ($200 la hora de gestión y $250 la de ingeniería y calidad) quedan dentro del rango de un junior en nómina y por debajo del piso de un junior freelance. A $400 la hora, las 440 h valdrían $176,000 y el cliente las recibe por $105,000, un 60 % de ese piso.
 
 Se conservan las tarifas porque el RFP fija un máximo de $120,000 MXN y el plan está dimensionado para un equipo junior: a $400 la hora, los $105,000 alcanzan para unas 262 h y no para las 440 del plan. Se declara en la propuesta como un precio de entrada, sin cargas de nómina ni de operación de una consultora.
 
@@ -340,11 +340,11 @@ El gasto estimado es de unos 0.02 USD al mes (cerca de $0.5 MXN), muy por debajo
 | Concepto | MXN | USD (a $20) |
 |---|---:|---:|
 | Equipo, 440 h (sección 12.1) | $105,000 | 5,250 |
-| AWS durante implementación (estimado) | $1,000 | 50 |
-| Reserva para variaciones | $14,000 | 700 |
+| AWS: tope con alerta al 80 % | $100 | 5 |
+| Reserva para variaciones | $14,900 | 745 |
 | **Total máximo de referencia** | **$120,000** | **6,000** |
 
-El gasto esperado en AWS (sección 12.3) queda muy por debajo de los $1,000 reservados para implementación; el tope con alerta de la cuenta es USD 5 (secciones 5.5 y 12.3).
+El gasto esperado en AWS (sección 12.3) queda dentro del tope de $100, que es el único monto reservado en el total.
 
 Costo operativo mensual esperado tras la entrega: **$0** (el costo de almacenamiento de decenas de MB en S3 queda dentro del free tier o de centavos), muy por debajo del máximo de $2,000 MXN del RFP. Cualquier servicio de pago, dominio o cambio de arquitectura se aprueba antes de contratarse.
 
