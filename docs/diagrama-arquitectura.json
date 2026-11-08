@@ -1,51 +1,372 @@
 {
   "formatVersion": 1,
   "title": "Pharmacy Pulse - arquitectura en AWS",
-  "meta": { "author": "Equipo 6", "version": "2.0" },
+  "meta": {
+    "author": "Equipo 6",
+    "version": "3.0",
+    "cost": "Proyecto: equipo 440 h = $105,000 MXN + AWS tope USD 5 = $100 MXN + reserva $14,900 MXN = $120,000 MXN maximo de referencia (SOW 12). Gasto esperado de AWS: aprox. USD 0.03 al mes (SOW 12.3)"
+  },
   "groups": [
-    { "id": "local", "label": "Equipo de datos (local)", "color": "lavanda", "icon": "aws/group-datacenter", "kind": "physical" },
-    { "id": "aws",   "label": "AWS Cloud", "color": "melocoton", "icon": "aws/group-cloud", "kind": "physical" },
-    { "id": "acct",  "label": "Cuenta AWS del proyecto", "color": "melocoton", "icon": "aws/group-account", "kind": "physical", "parent": "aws" },
-    { "id": "reg",   "label": "Region (a definir en Gate 1)", "color": "cielo", "icon": "aws/group-region", "kind": "physical", "parent": "acct" },
-    { "id": "lraw",  "label": "Zona raw", "color": "melocoton", "kind": "logical", "parent": "reg", "layer": "bronze" },
-    { "id": "lcln",  "label": "Zona clean", "color": "cielo", "kind": "logical", "parent": "reg", "layer": "silver" },
-    { "id": "lcur",  "label": "Zona curated", "color": "limon", "kind": "logical", "parent": "reg", "layer": "gold" }
+    {
+      "id": "local",
+      "label": "Equipo de datos (local)",
+      "color": "lavanda",
+      "icon": "aws/group-datacenter",
+      "kind": "physical"
+    },
+    {
+      "id": "aws",
+      "label": "AWS Cloud",
+      "color": "melocoton",
+      "icon": "aws/group-cloud",
+      "kind": "physical"
+    },
+    {
+      "id": "acct",
+      "label": "Cuenta AWS del proyecto",
+      "color": "melocoton",
+      "icon": "aws/group-account",
+      "kind": "physical",
+      "parent": "aws"
+    },
+    {
+      "id": "reg",
+      "label": "Region (a definir en Gate 1)",
+      "color": "cielo",
+      "icon": "aws/group-region",
+      "kind": "physical",
+      "parent": "acct"
+    },
+    {
+      "id": "lraw",
+      "label": "Bronze (raw)",
+      "color": "melocoton",
+      "kind": "logical",
+      "parent": "reg",
+      "layer": "bronze"
+    },
+    {
+      "id": "lcln",
+      "label": "Silver (clean)",
+      "color": "cielo",
+      "kind": "logical",
+      "parent": "reg",
+      "layer": "silver"
+    },
+    {
+      "id": "lcur",
+      "label": "Gold (curated)",
+      "color": "limon",
+      "kind": "logical",
+      "parent": "reg",
+      "layer": "gold"
+    },
+    {
+      "id": "glob",
+      "label": "Servicios globales de la cuenta",
+      "color": "lavanda",
+      "icon": "aws/group-cloud",
+      "kind": "physical",
+      "parent": "acct"
+    },
+    {
+      "id": "team",
+      "label": "Equipo del proyecto: 440 h, $105,000 MXN (SOW 12)",
+      "color": "limon",
+      "kind": "logical"
+    }
   ],
   "nodes": [
-    { "id": "inegi",  "label": "INEGI", "type": "external", "sub": "Censo, DENUE, Marco Geoestadistico", "data": ["public"] },
-    { "id": "pipe",   "label": "make pipeline", "type": "compute", "sub": "src/01_extract ... 05_map (Python)", "group": "local" },
-    { "id": "qa",     "label": "Reglas de calidad R1-R8", "type": "function", "sub": "tests/data_quality_checks.py", "group": "local" },
-    { "id": "duck",   "label": "DuckDB", "type": "db", "sub": "Consulta SQL sobre Parquet", "group": "local" },
-    { "id": "map",    "label": "Mapa y ranking", "type": "storage", "sub": "ranking.csv + mapa estatico", "group": "local" },
-
-    { "id": "cfn",    "label": "CloudFormation", "type": "devops", "icon": "aws/cloudformation", "sub": "infra/template.yaml", "group": "acct" },
-    { "id": "iam",    "label": "IAM", "type": "security", "icon": "aws/iam", "sub": "Rol de minimo privilegio", "group": "acct" },
-    { "id": "budget", "label": "AWS Budgets", "type": "monitor", "sub": "Tope USD 5, alerta al 80 %", "group": "acct", "cost": 0 },
-    { "id": "s3raw",  "label": "S3 raw", "type": "storage", "icon": "aws/s3", "sub": "raw/<fuente>/<fecha>, inmutable", "group": "lraw", "cost": 0, "data": ["public"] },
-    { "id": "s3cln",  "label": "S3 clean", "type": "storage", "icon": "aws/s3", "sub": "Parquet tipado", "group": "lcln", "cost": 0, "data": ["public"] },
-    { "id": "s3cur",  "label": "S3 curated", "type": "storage", "icon": "aws/s3", "sub": "Parquet con indicadores e IPA", "group": "lcur", "cost": 0, "data": ["public"] },
-    { "id": "athena", "label": "Athena (opcional)", "type": "db", "icon": "aws/athena", "sub": "Alternativa a DuckDB, sin Glue Crawler", "group": "reg" },
-
-    { "id": "client", "label": "Pharmacy Pulse", "type": "user", "sub": "Ranking de al menos 10 zonas" }
+    {
+      "id": "inegi",
+      "label": "INEGI",
+      "type": "external",
+      "sub": "Censo, DENUE, Marco Geoestadistico",
+      "data": [
+        "public"
+      ],
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "pipe",
+      "label": "make pipeline",
+      "type": "compute",
+      "sub": "src/01_extract ... 05_map (Python)",
+      "group": "local",
+      "x": 400,
+      "y": 0,
+      "desc": "Local, sin costo; sin Lambda ni EventBridge (SOW 5.3)",
+      "cost": 0
+    },
+    {
+      "id": "qa",
+      "label": "Reglas de calidad R1-R8",
+      "type": "function",
+      "sub": "tests/data_quality_checks.py",
+      "group": "local",
+      "x": 800,
+      "y": 0
+    },
+    {
+      "id": "duck",
+      "label": "DuckDB",
+      "type": "db",
+      "sub": "Motor SQL embebido sobre Parquet: sin servidor, sin costo, un solo analista, datos de unos cientos de MB",
+      "group": "local",
+      "x": 1200,
+      "y": 0,
+      "desc": "Local, sin costo (SOW 5.4)",
+      "cost": 0
+    },
+    {
+      "id": "map",
+      "label": "Mapa y ranking",
+      "type": "storage",
+      "sub": "ranking.csv + mapa estatico",
+      "group": "local",
+      "x": 1600,
+      "y": 0
+    },
+    {
+      "id": "s3raw",
+      "label": "S3 bronze",
+      "type": "storage",
+      "icon": "aws/s3",
+      "sub": "raw/<fuente>/<fecha>, inmutable | 0.5 GB = USD 0.012/mes",
+      "group": "lraw",
+      "cost": 0.012,
+      "data": [
+        "public"
+      ],
+      "x": 400,
+      "y": 330,
+      "desc": "Estimacion: 0.5 GB x 0.023 USD/GB-mes = 0.012 USD/mes a precio de lista, antes de free tier (SOW 12.3)"
+    },
+    {
+      "id": "s3cln",
+      "label": "S3 silver",
+      "type": "storage",
+      "icon": "aws/s3",
+      "sub": "Parquet tipado | 0.1 GB = USD 0.002/mes",
+      "group": "lcln",
+      "cost": 0.002,
+      "data": [
+        "public"
+      ],
+      "x": 800,
+      "y": 330,
+      "desc": "Estimacion: 0.1 GB en Parquet x 0.023 USD/GB-mes = 0.002 USD/mes (SOW 12.3)"
+    },
+    {
+      "id": "s3cur",
+      "label": "S3 gold",
+      "type": "storage",
+      "icon": "aws/s3",
+      "sub": "Parquet con indicadores e IPA | 0.01 GB = USD 0.0002/mes",
+      "group": "lcur",
+      "cost": 0.0002,
+      "data": [
+        "public"
+      ],
+      "x": 1200,
+      "y": 330,
+      "desc": "Estimacion: 0.01 GB x 0.023 USD/GB-mes = 0.0002 USD/mes (SOW 12.3)"
+    },
+    {
+      "id": "athena",
+      "label": "Athena (opcional)",
+      "type": "db",
+      "icon": "aws/athena",
+      "sub": "Opcional, sin Glue Crawler | USD 0.01/mes",
+      "group": "reg",
+      "x": 1600,
+      "y": 330,
+      "desc": "Opcional. Estimacion: 100 consultas x 20 MB = 2 GB escaneados x 5 USD/TB = 0.01 USD/mes (SOW 5.4, 12.3)",
+      "cost": 0.01
+    },
+    {
+      "id": "cfn",
+      "label": "CloudFormation",
+      "type": "devops",
+      "icon": "aws/cloudformation",
+      "sub": "infra/template.yaml: crea buckets, rol y tope",
+      "group": "glob",
+      "x": 400,
+      "y": 620,
+      "desc": "Sin costo con recursos de AWS nativos (SOW 5.2, 12.3)",
+      "cost": 0
+    },
+    {
+      "id": "iam",
+      "label": "IAM",
+      "type": "security",
+      "icon": "aws/iam",
+      "sub": "Rol de minimo privilegio",
+      "group": "glob",
+      "x": 800,
+      "y": 620,
+      "desc": "Sin costo (SOW 5.2, 12.3)",
+      "cost": 0
+    },
+    {
+      "id": "budget",
+      "label": "AWS Budgets",
+      "type": "monitor",
+      "sub": "Tope USD 5 (aprox. $100 MXN), alerta al 80 % | USD 0/mes",
+      "group": "glob",
+      "cost": 0,
+      "x": 1200,
+      "y": 620,
+      "desc": "Gratis: los 2 primeros presupuestos por cuenta. Tope USD 5 (aprox. $100 MXN, SOW 12) con alerta al 80 % (SOW 5.5)"
+    },
+    {
+      "id": "client",
+      "label": "Pharmacy Pulse",
+      "type": "user",
+      "sub": "Ranking de al menos 10 zonas",
+      "x": 2000,
+      "y": 0
+    },
+    {
+      "id": "pm",
+      "label": "Brisa: PM y documentacion",
+      "type": "user",
+      "sub": "100 h x $200 MXN/h = $20,000 MXN",
+      "group": "team",
+      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1",
+      "x": 400,
+      "y": -330
+    },
+    {
+      "id": "ing",
+      "label": "Javier: ingesta y plataforma",
+      "type": "user",
+      "sub": "110 h x $250 MXN/h = $27,500 MXN",
+      "group": "team",
+      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1",
+      "x": 800,
+      "y": -330
+    },
+    {
+      "id": "trf",
+      "label": "Ana Paula: transformacion",
+      "type": "user",
+      "sub": "120 h x $250 MXN/h = $30,000 MXN",
+      "group": "team",
+      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1",
+      "x": 1200,
+      "y": -330
+    },
+    {
+      "id": "cal",
+      "label": "Karen: calidad y mapa",
+      "type": "user",
+      "sub": "110 h x $250 MXN/h = $27,500 MXN",
+      "group": "team",
+      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1",
+      "x": 1600,
+      "y": -330
+    }
   ],
   "edges": [
-    { "from": "inegi", "to": "pipe", "label": "1 descarga CSV/SHP", "encrypted": true, "data": ["public"] },
-    { "from": "pipe", "to": "s3raw", "label": "2 extract", "style": "data", "encrypted": true, "data": ["public"] },
-    { "from": "s3raw", "to": "pipe", "label": "3 clean", "style": "data", "encrypted": true, "data": ["public"] },
-    { "from": "pipe", "to": "s3cln", "label": "4 Parquet", "style": "data", "encrypted": true, "data": ["public"] },
-    { "from": "s3cln", "to": "pipe", "label": "5 indicadores + IPA", "style": "data", "encrypted": true, "data": ["public"] },
-    { "from": "pipe", "to": "s3cur", "label": "6 curated", "style": "data", "encrypted": true, "data": ["public"] },
-    { "from": "qa", "to": "s3cln", "label": "valida", "style": "optional", "encrypted": true },
-    { "from": "qa", "to": "s3cur", "label": "valida", "style": "optional", "encrypted": true },
-    { "from": "pipe", "to": "iam", "label": "asume rol", "encrypted": true },
-    { "from": "cfn", "to": "s3raw", "label": "crea", "style": "optional" },
-    { "from": "cfn", "to": "s3cln", "label": "crea", "style": "optional" },
-    { "from": "cfn", "to": "s3cur", "label": "crea", "style": "optional" },
-    { "from": "cfn", "to": "iam", "label": "crea", "style": "optional" },
-    { "from": "cfn", "to": "budget", "label": "crea", "style": "optional" },
-    { "from": "s3cur", "to": "duck", "label": "7 SQL", "style": "data", "encrypted": true, "data": ["public"] },
-    { "from": "s3cur", "to": "athena", "label": "opcional", "style": "optional", "encrypted": true },
-    { "from": "duck", "to": "map", "label": "8 map" },
-    { "from": "map", "to": "client", "label": "resumen ejecutivo" }
+    {
+      "from": "inegi",
+      "to": "pipe",
+      "label": "1 descarga CSV/SHP",
+      "encrypted": true,
+      "data": [
+        "public"
+      ]
+    },
+    {
+      "from": "pipe",
+      "to": "s3raw",
+      "label": "2 extract",
+      "style": "data",
+      "encrypted": true,
+      "data": [
+        "public"
+      ]
+    },
+    {
+      "from": "s3raw",
+      "to": "s3cln",
+      "label": "3 clean",
+      "style": "data",
+      "encrypted": true,
+      "data": [
+        "public"
+      ]
+    },
+    {
+      "from": "s3cln",
+      "to": "s3cur",
+      "label": "4 indicadores + IPA",
+      "style": "data",
+      "encrypted": true,
+      "data": [
+        "public"
+      ]
+    },
+    {
+      "from": "s3cur",
+      "to": "duck",
+      "label": "5 SQL",
+      "style": "data",
+      "encrypted": true,
+      "data": [
+        "public"
+      ]
+    },
+    {
+      "from": "duck",
+      "to": "map",
+      "label": "6 map"
+    },
+    {
+      "from": "map",
+      "to": "client",
+      "label": "resumen ejecutivo"
+    },
+    {
+      "from": "qa",
+      "to": "s3cln",
+      "label": "valida",
+      "style": "optional",
+      "encrypted": true
+    },
+    {
+      "from": "qa",
+      "to": "s3cur",
+      "label": "valida",
+      "style": "optional",
+      "encrypted": true
+    },
+    {
+      "from": "s3cur",
+      "to": "athena",
+      "label": "opcional",
+      "style": "optional",
+      "encrypted": true
+    },
+    {
+      "from": "pipe",
+      "to": "iam",
+      "label": "asume rol",
+      "encrypted": true
+    },
+    {
+      "from": "cfn",
+      "to": "iam",
+      "label": "crea",
+      "style": "optional"
+    },
+    {
+      "from": "cfn",
+      "to": "budget",
+      "label": "crea",
+      "style": "optional"
+    }
   ]
 }

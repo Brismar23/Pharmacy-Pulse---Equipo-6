@@ -8,7 +8,7 @@
 | **Contacto del cliente** | Fundadora/Fundador de Pharmacy Pulse |
 | **Equipo del proyecto** | Karen Pamela Rico Juárez, Brisa Mariana Gómez Luna, Ana Paula González Frías y Javier de Jesús Infante Martínez |
 | **Versión** | 2.0 |
-| **Fecha objetivo de entrega** | 29 de enero de 2027 |
+| **Fecha objetivo de entrega** | 28 de noviembre de 2026 |
 | **Presupuesto máximo de referencia** | $120,000 MXN |
 
 > Las decisiones que el RFP deja abiertas —unidad geográfica, categorías DENUE, tratamiento de unidades de salud, sustituto de ingreso y ponderaciones— se validan con Pharmacy Pulse en los Gates 1 y 2, antes de calcular el ranking definitivo.
@@ -89,7 +89,7 @@ Entregar a Pharmacy Pulse datos públicos confiables, versionados y documentados
 
 | Zona | Contenido | Reglas |
 |---|---|---|
-| `raw/` | Archivos tal como se descargaron de INEGI, en carpetas por fuente y fecha (`raw/denue/2026-11-23/`) | Nunca se modifica ni se sobrescribe; cada descarga conserva su versión |
+| `raw/` | Archivos tal como se descargaron de INEGI, en carpetas por fuente y fecha (`raw/denue/2026-10-27/`) | Nunca se modifica ni se sobrescribe; cada descarga conserva su versión |
 | `clean/` | Datos limpios, tipados y homologados, en Parquet | Se regenera desde `raw`; pasa las reglas de calidad |
 | `curated/` | Tabla final por zona con indicadores e IPA | Idempotente; es la única entrada del ranking y del mapa |
 
@@ -260,11 +260,11 @@ Convención: carpetas y archivos en minúsculas y sin espacios. El PDF se genera
 
 | Fase | Fechas | Actividades y salida |
 |---|---|---|
-| Inicio y hito 1 | 10–20 nov 2026 | Kickoff; **verificar ingreso por AGEB y códigos SCIAN**; fijar plan B; desplegar CloudFormation y alerta de presupuesto; decidir unidad geográfica |
-| Ingesta y calidad | 23 nov–4 dic 2026 | Descarga a `raw` versionado, `clean`, fichas de fuente, reglas de calidad y diccionario |
-| Transformación y análisis | 7 dic 2026–8 ene 2027 | Tabla `curated`, linaje, IPA, ranking preliminar, mapa y (opcional) sensibilidad |
-| Revisión con cliente | 11–15 ene 2027 | Revisar resultados, decisiones pendientes y correcciones dentro de alcance |
-| Entrega y presentación | 18–29 ene 2027 | Repositorio final, prueba de reproducción, resumen y presentación |
+| Inicio y hito 1 | 15–23 oct 2026 | Kickoff; **verificar ingreso por AGEB y códigos SCIAN**; fijar plan B; desplegar CloudFormation y alerta de presupuesto; decidir unidad geográfica |
+| Ingesta y calidad | 26 oct–6 nov 2026 | Descarga a `raw` versionado, `clean`, fichas de fuente, reglas de calidad y diccionario |
+| Transformación y análisis | 9–18 nov 2026 | Tabla `curated`, linaje, IPA, ranking preliminar, mapa y (opcional) sensibilidad |
+| Revisión con cliente | 19–23 nov 2026 | Revisar resultados, decisiones pendientes y correcciones dentro de alcance |
+| Entrega y presentación | 24–28 nov 2026 | Repositorio final, prueba de reproducción, resumen y presentación |
 
 ### Gates de decisión
 - **Gate 1:** unidad geográfica, fuentes, sustituto de ingreso y arquitectura.
@@ -284,6 +284,59 @@ Convención: carpetas y archivos en minúsculas y sin espacios. El PDF se genera
 | AWS: tope de presupuesto con alerta al 80 % (USD 5 aprox.) | | | $100 MXN |
 | Reserva para variaciones (aprox. 12 %) | | | $14,900 MXN |
 | **Total máximo de referencia** | | | **$120,000 MXN** |
+
+### 12.1 Horas por persona y por fase
+
+Las 440 h se reparten según el calendario de la sección 11 (del 15 de octubre al 28 de noviembre de 2026, unas 6 semanas). Cada integrante dedica cerca de 17 h por semana. El reparto es una propuesta a confirmar en el kickoff, junto con la asignación de roles.
+
+| Fase | Fechas | PM y documentación (Brisa) | Ingesta y plataforma (Javier) | Transformación (Ana Paula) | Calidad y mapa (Karen) | Horas | Importe |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Inicio y hito 1 | 15–23 oct | 20 | 35 | 15 | 20 | 90 | $21,500 |
+| Ingesta y calidad | 26 oct–6 nov | 15 | 35 | 25 | 35 | 110 | $26,750 |
+| Transformación y análisis | 9–18 nov | 20 | 15 | 50 | 35 | 120 | $29,000 |
+| Revisión con cliente | 19–23 nov | 20 | 10 | 15 | 5 | 50 | $11,500 |
+| Entrega y presentación | 24–28 nov | 25 | 15 | 15 | 15 | 70 | $16,250 |
+| **Total** | | **100** | **110** | **120** | **110** | **440** | **$105,000** |
+
+La carga se concentra en ingesta y plataforma durante el inicio y la ingesta, y en transformación durante el análisis. La project manager sube en la revisión y la entrega, donde pesan el cliente y la documentación.
+
+### 12.2 Tarifas frente al mercado
+
+| Referencia (México, 2026) | Sueldo bruto mensual | Equivalente por hora (160 h) |
+|---|---:|---:|
+| Data engineer junior, sueldo base promedio (Indeed) | aprox. $20,400 | aprox. $130 |
+| Perfil junior de software (Jobrise) | $25,000 a $45,000 | $155 a $280 |
+| Data engineer semi senior, oferta publicada | aprox. $40,000 | aprox. $250 |
+
+Las tarifas del SOW ($200 la hora de gestión y $250 la de ingeniería y calidad) quedan entre el costo por hora de un perfil junior y el de uno semi senior. Esa diferencia cubre las prestaciones, el tiempo no facturable y el margen que un sueldo bruto no incluye, y es razonable para un equipo con entrega gobernada y repositorio público. Por eso no se modifican las tarifas ni el total de $120,000 MXN. Son cifras de portales de empleo y no una encuesta oficial; conviene contrastarlas con otra fuente antes de cerrar con el cliente.
+
+### 12.3 Estimación del gasto en AWS
+
+Precios de lista de Amazon S3 Standard (0.023 USD por GB-mes, región us-east-1; la región se define en el Gate 1) y de Athena (5 USD por TB escaneado), sin descontar el free tier. Tipo de cambio de referencia: $20 MXN por USD, el mismo de la partida de AWS. Los volúmenes son supuestos del equipo y se confirman con la primera descarga en el hito 1.
+
+| Servicio | Supuesto de uso | USD por mes | MXN por mes |
+|---|---|---:|---:|
+| S3 bronze (`raw`) | 0.5 GB, versionado por fecha | 0.012 | $0.24 |
+| S3 silver (`clean`) | 0.1 GB en Parquet | 0.002 | $0.04 |
+| S3 gold (`curated`) | 0.01 GB en Parquet | 0.0002 | $0.004 |
+| Athena (opcional) | 100 consultas de 20 MB (2 GB escaneados) | 0.01 | $0.20 |
+| CloudFormation, IAM | Sin cargo por usarlos | 0 | $0 |
+| AWS Budgets | Los 2 primeros presupuestos por cuenta no tienen costo | 0 | $0 |
+| DuckDB y `make pipeline` | Se ejecutan en el equipo local | 0 | $0 |
+| **Total estimado** | | **aprox. 0.03** | **aprox. $0.5** |
+
+El gasto estimado es de unos 0.03 USD al mes (cerca de $0.5 MXN), muy por debajo del tope de USD 5. Los requests de S3 y la transferencia de salida son despreciables con estos volúmenes. Si el volumen real de `raw` fuera diez veces mayor, el total seguiría por debajo de 0.2 USD al mes.
+
+### 12.4 Costo total del proyecto
+
+| Concepto | MXN | USD (a $20) |
+|---|---:|---:|
+| Equipo, 440 h (sección 12.1) | $105,000 | 5,250 |
+| AWS: tope con alerta al 80 % | $100 | 5 |
+| Reserva para variaciones | $14,900 | 745 |
+| **Total máximo de referencia** | **$120,000** | **6,000** |
+
+El gasto esperado en AWS (sección 12.3) queda dentro del tope de $100, que es el único monto reservado en el total.
 
 Costo operativo mensual esperado tras la entrega: **$0** (el costo de almacenamiento de decenas de MB en S3 queda dentro del free tier o de centavos), muy por debajo del máximo de $2,000 MXN del RFP. Cualquier servicio de pago, dominio o cambio de arquitectura se aprueba antes de contratarse.
 
