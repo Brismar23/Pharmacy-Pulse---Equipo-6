@@ -323,9 +323,9 @@ Precios de lista de Amazon S3 Standard (0.023 USD por GB-mes, región us-east-1;
 | CloudFormation, IAM | Sin cargo por usarlos | 0 | $0 |
 | AWS Budgets | Los 2 primeros presupuestos por cuenta no tienen costo | 0 | $0 |
 | DuckDB y `make pipeline` | Se ejecutan en el equipo local | 0 | $0 |
-| **Total estimado** | | **aprox. 0.03** | **aprox. $0.5** |
+| **Total estimado** | | **aprox. 0.02** | **aprox. $0.5** |
 
-El gasto estimado es de unos 0.03 USD al mes (cerca de $0.5 MXN), muy por debajo del tope de USD 5. Los requests de S3 y la transferencia de salida son despreciables con estos volúmenes. Si el volumen real de `raw` fuera diez veces mayor, el total seguiría por debajo de 0.2 USD al mes.
+El gasto estimado es de unos 0.02 USD al mes (cerca de $0.5 MXN), muy por debajo del tope de USD 5. Los requests de S3 y la transferencia de salida son despreciables con estos volúmenes. Si el volumen real de `raw` fuera diez veces mayor, el total seguiría por debajo de 0.2 USD al mes.
 
 ### 12.4 Costo total del proyecto
 

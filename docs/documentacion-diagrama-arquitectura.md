@@ -41,7 +41,7 @@ CloudFormation, IAM y Budgets se dibujan abajo, en el recuadro "Servicios global
 
 - Es un motor SQL embebido: se instala con `pip`, sin servidor ni cluster, y lee Parquet directo desde S3.
 - Costo de $0 y sin cómputo permanente en AWS (SOW 4 y 5.5); Athena cobra por dato escaneado y pide catálogo.
-- El volumen (Censo, DENUE y geografía de unas cuantas zonas, cientos de MB) cabe en una laptop; Spark o Databricks serían sobredimensionados.
+- El volumen (Censo, DENUE y geografía de unas cuantas zonas, decenas de MB) cabe en una laptop; Spark o Databricks serían sobredimensionados.
 - Un solo analista y ejecución por `make pipeline`: no hay concurrencia que justifique un warehouse.
 - Si el volumen crece, Athena (opcional) usa los mismos Parquet de gold sin reescribir nada.
 
@@ -89,7 +89,7 @@ Las líneas punteadas del diagrama son de control, no de datos:
 - **Procesos, no componentes:** el linaje, el versionado de `raw` por fecha y la etiqueta de confianza (SOW 6.4 a 6.6) no se dibujan como nodos.
 - **Sustituto de ingreso:** se define en el hito 1 (SOW 7.5) y no aparece.
 - **Ícono de AWS Budgets:** Diagramon no trae uno oficial; usa uno genérico.
-- **Costos (SOW 12.3):** estimación de aprox. 0.03 USD al mes (cerca de $0.5 MXN) a precio de lista, antes del free tier: S3 bronze 0.012, silver 0.002, gold 0.0002 y Athena opcional 0.01. CloudFormation, IAM, Budgets, DuckDB y `make pipeline` van en 0. AWS Budgets lleva el tope de USD 5 (aprox. $100 MXN) y la alerta al 80 %; el tope es un límite, no un gasto.
+- **Costos (SOW 12.3):** estimación de aprox. 0.02 USD al mes (cerca de $0.5 MXN) a precio de lista, antes del free tier: S3 bronze 0.012, silver 0.002, gold 0.0002 y Athena opcional 0.01. CloudFormation, IAM, Budgets, DuckDB y `make pipeline` van en 0. AWS Budgets lleva el tope de USD 5 (aprox. $100 MXN) y la alerta al 80 %; el tope es un límite, no un gasto.
 - **Supuestos:** los volúmenes (0.5, 0.1 y 0.01 GB) son del equipo y se confirman con la primera descarga; el free tier y la región se revisan antes del Gate 1.
 - **Servicios no incluidos:** VPC, KMS, CloudWatch y Lambda, porque el SOW no los contempla.
 - **Estado:** el JSON es válido y sus referencias existen. Importado en Diagramon el 2026-11-07: 13 componentes, 13 conexiones, sin avisos. Falta regenerar el PNG de arriba, que sigue siendo el de la versión anterior.

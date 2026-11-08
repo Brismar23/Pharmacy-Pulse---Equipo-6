@@ -4,7 +4,7 @@
   "meta": {
     "author": "Equipo 6",
     "version": "3.0",
-    "cost": "Proyecto: equipo 440 h = $105,000 MXN + AWS tope USD 5 = $100 MXN + reserva $14,900 MXN = $120,000 MXN maximo de referencia (SOW 12). Gasto esperado de AWS: aprox. USD 0.03 al mes (SOW 12.3)"
+    "cost": "Proyecto: equipo 440 h = $105,000 MXN + AWS tope USD 5 = $100 MXN + reserva $14,900 MXN = $120,000 MXN maximo de referencia (SOW 12). Gasto esperado de AWS: aprox. USD 0.02 al mes (SOW 12.3)"
   },
   "groups": [
     {
@@ -81,59 +81,62 @@
       "id": "inegi",
       "label": "INEGI",
       "type": "external",
-      "sub": "Censo, DENUE, Marco Geoestadistico",
+      "sub": "Censo, DENUE, Marco Geo.",
       "data": [
         "public"
       ],
       "x": 0,
-      "y": 0
+      "y": 0,
+      "desc": "Censo de Poblacion y Vivienda, DENUE y Marco Geoestadistico (SOW 6.1)"
     },
     {
       "id": "pipe",
       "label": "make pipeline",
       "type": "compute",
-      "sub": "src/01_extract ... 05_map (Python)",
+      "sub": "Python, 01 a 05",
       "group": "local",
       "x": 400,
       "y": 0,
-      "desc": "Local, sin costo; sin Lambda ni EventBridge (SOW 5.3)",
+      "desc": "src/01_extract a 05_map en Python. Local, sin costo; sin Lambda ni EventBridge (SOW 5.3)",
       "cost": 0
     },
     {
       "id": "qa",
       "label": "Reglas de calidad R1-R8",
       "type": "function",
-      "sub": "tests/data_quality_checks.py",
+      "sub": "data_quality_checks.py",
       "group": "local",
       "x": 800,
-      "y": 0
+      "y": 0,
+      "desc": "Reglas R1-R8 en tests/data_quality_checks.py, corren en cada carga (SOW 6.3)"
     },
     {
       "id": "duck",
       "label": "DuckDB",
       "type": "db",
-      "sub": "Motor SQL embebido sobre Parquet: sin servidor, sin costo, un solo analista, datos de unos cientos de MB",
+      "sub": "SQL sobre Parquet",
       "group": "local",
       "x": 1200,
       "y": 0,
-      "desc": "Local, sin costo (SOW 5.4)",
+      "desc": "DuckDB: motor SQL embebido sobre Parquet, sin servidor, sin costo, un solo analista, datos de decenas de MB; Athena queda como alternativa (SOW 5.4)",
       "cost": 0
     },
     {
       "id": "map",
       "label": "Mapa y ranking",
       "type": "storage",
-      "sub": "ranking.csv + mapa estatico",
+      "sub": "ranking.csv + mapa",
       "group": "local",
       "x": 1600,
-      "y": 0
+      "y": 0,
+      "desc": "ranking.csv y mapa estatico generados por 05_map (SOW 3, 8)"
     },
     {
       "id": "s3raw",
       "label": "S3 bronze",
       "type": "storage",
       "icon": "aws/s3",
-      "sub": "raw/<fuente>/<fecha>, inmutable | 0.5 GB = USD 0.012/mes",
+      "sub": "0.5 GB = USD 0.012/mes",
       "group": "lraw",
       "cost": 0.012,
       "data": [
@@ -148,7 +151,7 @@
       "label": "S3 silver",
       "type": "storage",
       "icon": "aws/s3",
-      "sub": "Parquet tipado | 0.1 GB = USD 0.002/mes",
+      "sub": "0.1 GB = USD 0.002/mes",
       "group": "lcln",
       "cost": 0.002,
       "data": [
@@ -163,7 +166,7 @@
       "label": "S3 gold",
       "type": "storage",
       "icon": "aws/s3",
-      "sub": "Parquet con indicadores e IPA | 0.01 GB = USD 0.0002/mes",
+      "sub": "0.01 GB = USD 0.0002/mes",
       "group": "lcur",
       "cost": 0.0002,
       "data": [
@@ -178,7 +181,7 @@
       "label": "Athena (opcional)",
       "type": "db",
       "icon": "aws/athena",
-      "sub": "Opcional, sin Glue Crawler | USD 0.01/mes",
+      "sub": "Opcional | USD 0.01/mes",
       "group": "reg",
       "x": 1600,
       "y": 330,
@@ -190,11 +193,11 @@
       "label": "CloudFormation",
       "type": "devops",
       "icon": "aws/cloudformation",
-      "sub": "infra/template.yaml: crea buckets, rol y tope",
+      "sub": "infra/template.yaml",
       "group": "glob",
-      "x": 400,
+      "x": 800,
       "y": 620,
-      "desc": "Sin costo con recursos de AWS nativos (SOW 5.2, 12.3)",
+      "desc": "infra/template.yaml crea los buckets, el rol IAM y el presupuesto. Sin costo con recursos de AWS nativos (SOW 5.2, 12.3)",
       "cost": 0
     },
     {
@@ -204,19 +207,19 @@
       "icon": "aws/iam",
       "sub": "Rol de minimo privilegio",
       "group": "glob",
-      "x": 800,
+      "x": 1200,
       "y": 620,
-      "desc": "Sin costo (SOW 5.2, 12.3)",
+      "desc": "Rol de minimo privilegio que asume make pipeline. Sin costo (SOW 5.2, 12.3)",
       "cost": 0
     },
     {
       "id": "budget",
       "label": "AWS Budgets",
       "type": "monitor",
-      "sub": "Tope USD 5 (aprox. $100 MXN), alerta al 80 % | USD 0/mes",
+      "sub": "Tope USD 5 | USD 0/mes",
       "group": "glob",
       "cost": 0,
-      "x": 1200,
+      "x": 400,
       "y": 620,
       "desc": "Gratis: los 2 primeros presupuestos por cuenta. Tope USD 5 (aprox. $100 MXN, SOW 12) con alerta al 80 % (SOW 5.5)"
     },
@@ -224,17 +227,18 @@
       "id": "client",
       "label": "Pharmacy Pulse",
       "type": "user",
-      "sub": "Ranking de al menos 10 zonas",
+      "sub": "Ranking de 10+ zonas",
       "x": 2000,
-      "y": 0
+      "y": 0,
+      "desc": "Ranking de al menos 10 zonas, mapa y resumen ejecutivo (SOW 8)"
     },
     {
       "id": "pm",
       "label": "Brisa: PM y documentacion",
       "type": "user",
-      "sub": "100 h x $200 MXN/h = $20,000 MXN",
+      "sub": "100 h = $20,000 MXN",
       "group": "team",
-      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1",
+      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1. 100 h x $200 MXN/h",
       "x": 400,
       "y": -330
     },
@@ -242,9 +246,9 @@
       "id": "ing",
       "label": "Javier: ingesta y plataforma",
       "type": "user",
-      "sub": "110 h x $250 MXN/h = $27,500 MXN",
+      "sub": "110 h = $27,500 MXN",
       "group": "team",
-      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1",
+      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1. 110 h x $250 MXN/h",
       "x": 800,
       "y": -330
     },
@@ -252,9 +256,9 @@
       "id": "trf",
       "label": "Ana Paula: transformacion",
       "type": "user",
-      "sub": "120 h x $250 MXN/h = $30,000 MXN",
+      "sub": "120 h = $30,000 MXN",
       "group": "team",
-      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1",
+      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1. 120 h x $250 MXN/h",
       "x": 1200,
       "y": -330
     },
@@ -262,9 +266,9 @@
       "id": "cal",
       "label": "Karen: calidad y mapa",
       "type": "user",
-      "sub": "110 h x $250 MXN/h = $27,500 MXN",
+      "sub": "110 h = $27,500 MXN",
       "group": "team",
-      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1",
+      "desc": "Horas y tarifa del SOW 12; reparto por fase en SOW 12.1. 110 h x $250 MXN/h",
       "x": 1600,
       "y": -330
     }
@@ -348,12 +352,6 @@
       "to": "athena",
       "label": "opcional",
       "style": "optional",
-      "encrypted": true
-    },
-    {
-      "from": "pipe",
-      "to": "iam",
-      "label": "asume rol",
       "encrypted": true
     },
     {
