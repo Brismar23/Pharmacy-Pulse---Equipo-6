@@ -8,7 +8,7 @@
 | **Contacto del cliente** | Fundadora/Fundador de Pharmacy Pulse |
 | **Equipo del proyecto** | Karen Pamela Rico Juárez, Brisa Mariana Gómez Luna, Ana Paula González Frías y Javier de Jesús Infante Martínez |
 | **Versión** | 2.0 |
-| **Fecha objetivo de entrega** | 28 de noviembre de 2026 |
+| **Fecha objetivo de entrega** | 29 de enero de 2027 |
 | **Presupuesto máximo de referencia** | $120,000 MXN |
 
 > Las decisiones que el RFP deja abiertas —unidad geográfica, categorías DENUE, tratamiento de unidades de salud, sustituto de ingreso y ponderaciones— se validan con Pharmacy Pulse en los Gates 1 y 2, antes de calcular el ranking definitivo.
@@ -89,7 +89,7 @@ Entregar a Pharmacy Pulse datos públicos confiables, versionados y documentados
 
 | Zona | Contenido | Reglas |
 |---|---|---|
-| `raw/` | Archivos tal como se descargaron de INEGI, en carpetas por fuente y fecha (`raw/denue/2026-10-27/`) | Nunca se modifica ni se sobrescribe; cada descarga conserva su versión |
+| `raw/` | Archivos tal como se descargaron de INEGI, en carpetas por fuente y fecha (`raw/denue/2026-11-23/`) | Nunca se modifica ni se sobrescribe; cada descarga conserva su versión |
 | `clean/` | Datos limpios, tipados y homologados, en Parquet | Se regenera desde `raw`; pasa las reglas de calidad |
 | `curated/` | Tabla final por zona con indicadores e IPA | Idempotente; es la única entrada del ranking y del mapa |
 
@@ -260,11 +260,11 @@ Convención: carpetas y archivos en minúsculas y sin espacios. El PDF se genera
 
 | Fase | Fechas | Actividades y salida |
 |---|---|---|
-| Inicio y hito 1 | 15–23 oct 2026 | Kickoff; **verificar ingreso por AGEB y códigos SCIAN**; fijar plan B; desplegar CloudFormation y alerta de presupuesto; decidir unidad geográfica |
-| Ingesta y calidad | 26 oct–6 nov 2026 | Descarga a `raw` versionado, `clean`, fichas de fuente, reglas de calidad y diccionario |
-| Transformación y análisis | 9–18 nov 2026 | Tabla `curated`, linaje, IPA, ranking preliminar, mapa y (opcional) sensibilidad |
-| Revisión con cliente | 19–23 nov 2026 | Revisar resultados, decisiones pendientes y correcciones dentro de alcance |
-| Entrega y presentación | 24–28 nov 2026 | Repositorio final, prueba de reproducción, resumen y presentación |
+| Inicio y hito 1 | 10–20 nov 2026 | Kickoff; **verificar ingreso por AGEB y códigos SCIAN**; fijar plan B; desplegar CloudFormation y alerta de presupuesto; decidir unidad geográfica |
+| Ingesta y calidad | 23 nov–4 dic 2026 | Descarga a `raw` versionado, `clean`, fichas de fuente, reglas de calidad y diccionario |
+| Transformación y análisis | 7 dic 2026–8 ene 2027 | Tabla `curated`, linaje, IPA, ranking preliminar, mapa y (opcional) sensibilidad |
+| Revisión con cliente | 11–15 ene 2027 | Revisar resultados, decisiones pendientes y correcciones dentro de alcance |
+| Entrega y presentación | 18–29 ene 2027 | Repositorio final, prueba de reproducción, resumen y presentación |
 
 ### Gates de decisión
 - **Gate 1:** unidad geográfica, fuentes, sustituto de ingreso y arquitectura.
@@ -287,15 +287,15 @@ Convención: carpetas y archivos en minúsculas y sin espacios. El PDF se genera
 
 ### 12.1 Horas por persona y por fase
 
-Las 440 h se reparten según el calendario de la sección 11 (del 15 de octubre al 28 de noviembre de 2026, unas 6 semanas). Cada integrante dedica cerca de 17 h por semana. El reparto es una propuesta a confirmar en el kickoff, junto con la asignación de roles.
+Las 440 h se reparten según el calendario de la sección 11 (unas 10 semanas efectivas, con el receso de fin de año). Cada integrante dedica cerca de 11 h por semana. El reparto es una propuesta a confirmar en el kickoff, junto con la asignación de roles.
 
 | Fase | Fechas | PM y documentación (Brisa) | Ingesta y plataforma (Javier) | Transformación (Ana Paula) | Calidad y mapa (Karen) | Horas | Importe |
 |---|---|---:|---:|---:|---:|---:|---:|
-| Inicio y hito 1 | 15–23 oct | 20 | 35 | 15 | 20 | 90 | $21,500 |
-| Ingesta y calidad | 26 oct–6 nov | 15 | 35 | 25 | 35 | 110 | $26,750 |
-| Transformación y análisis | 9–18 nov | 20 | 15 | 50 | 35 | 120 | $29,000 |
-| Revisión con cliente | 19–23 nov | 20 | 10 | 15 | 5 | 50 | $11,500 |
-| Entrega y presentación | 24–28 nov | 25 | 15 | 15 | 15 | 70 | $16,250 |
+| Inicio y hito 1 | 10–20 nov | 20 | 30 | 10 | 10 | 70 | $16,500 |
+| Ingesta y calidad | 23 nov–4 dic | 15 | 35 | 20 | 30 | 100 | $24,250 |
+| Transformación y análisis | 7 dic–8 ene | 20 | 15 | 60 | 35 | 130 | $31,500 |
+| Revisión con cliente | 11–15 ene | 20 | 10 | 15 | 15 | 60 | $14,000 |
+| Entrega y presentación | 18–29 ene | 25 | 20 | 15 | 20 | 80 | $18,750 |
 | **Total** | | **100** | **110** | **120** | **110** | **440** | **$105,000** |
 
 La carga se concentra en ingesta y plataforma durante el inicio y la ingesta, y en transformación durante el análisis. La project manager sube en la revisión y la entrega, donde pesan el cliente y la documentación.
