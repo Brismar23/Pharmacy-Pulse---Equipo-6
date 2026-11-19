@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Pharmacy Pulse - Plantilla 1 de 2: almacenamiento S3 (data lake medallón).
+  Crea los buckets bronze, silver, gold y artifacts. Se despliega ANTES que
+  Lambdas.yaml, que importa estos nombres. Stack sugerido: pharmacy-pulse-dev-storage.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: pharmacy-pulse
+    AllowedPattern: "^[a-z0-9-]{3,20}$"
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+  BronzeNoncurrentDays:
+    Type: Number
+    Default: 365
+    Description: Días que se conservan versiones anteriores de un objeto en bronze.
+
+Resources:
+  # ---------------------------------------------------------------- bronze (raw)
+  # Zips del INEGI tal como se descargaron, por fuente y fecha. Nunca se sobrescriben.
+  BronzeBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "${ProjectName}-${Environment}-bronze-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration: { Status: Enabled }
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ ObjectOwnership: BucketOwnerEnforced }]
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true   # el manifiesto nuevo dispara la Lambda de limpieza
+      LifecycleConfiguration:
+        Rules:
+          - Id: versiones-anteriores
+            Status: Enabled
+            NoncurrentVersionExpiration: { NoncurrentDays: !Ref BronzeNoncurrentDays }
+          - Id: cargas-incompletas
+            Status: Enabled
+            AbortIncompleteMultipartUpload: { DaysAfterInitiation: 7 }
+      Tags:
+        - { Key: project, Value: !Ref ProjectName }
+        - { Key: layer, Value: bronze }
+
+  BronzeBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BronzeBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SoloHTTPS
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource: [!GetAtt BronzeBucket.Arn, !Sub "${BronzeBucket.Arn}/*"]
+            Condition: { Bool: { aws:SecureTransport: "false" } }
+
+  # ---------------------------------------------------------------- silver (clean)
+  # Tablas limpias y tipadas (CSV UTF-8), una carpeta por versión de bronze.
+  SilverBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "${ProjectName}-${Environment}-silver-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration: { Status: Enabled }
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ ObjectOwnership: BucketOwnerEnforced }]
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true   # el manifiesto nuevo dispara la Lambda de indicadores
+      LifecycleConfiguration:
+        Rules:
+          - Id: versiones-anteriores
+            Status: Enabled
+            NoncurrentVersionExpiration: { NoncurrentDays: 90 }
+      Tags:
+        - { Key: project, Value: !Ref ProjectName }
+        - { Key: layer, Value: silver }
+
+  SilverBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SilverBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SoloHTTPS
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource: [!GetAtt SilverBucket.Arn, !Sub "${SilverBucket.Arn}/*"]
+            Condition: { Bool: { aws:SecureTransport: "false" } }
+
+  # ---------------------------------------------------------------- gold (curated)
+  # Tabla final por zona con IPA, ranking, reporte de calidad, mapa y resumen.
+  GoldBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "${ProjectName}-${Environment}-gold-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration: { Status: Enabled }
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ ObjectOwnership: BucketOwnerEnforced }]
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true   # el manifiesto nuevo dispara la Lambda del mapa
+      LifecycleConfiguration:
+        Rules:
+          - Id: versiones-anteriores
+            Status: Enabled
+            NoncurrentVersionExpiration: { NoncurrentDays: 90 }
+      Tags:
+        - { Key: project, Value: !Ref ProjectName }
+        - { Key: layer, Value: gold }
+
+  GoldBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref GoldBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SoloHTTPS
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource: [!GetAtt GoldBucket.Arn, !Sub "${GoldBucket.Arn}/*"]
+            Condition: { Bool: { aws:SecureTransport: "false" } }
+
+  # ---------------------------------------------------------------- artifacts
+  # Código empaquetado de las Lambdas (scripts/build.sh -> dist/*.zip -> lambdas/).
+  ArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-${Environment}-artifacts-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration: { Status: Enabled }
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ ObjectOwnership: BucketOwnerEnforced }]
+      LifecycleConfiguration:
+        Rules:
+          - Id: versiones-anteriores
+            Status: Enabled
+            NoncurrentVersionExpiration: { NoncurrentDays: 30 }
+      Tags:
+        - { Key: project, Value: !Ref ProjectName }
+        - { Key: layer, Value: artifacts }
+
+  ArtifactsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ArtifactsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SoloHTTPS
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource: [!GetAtt ArtifactsBucket.Arn, !Sub "${ArtifactsBucket.Arn}/*"]
+            Condition: { Bool: { aws:SecureTransport: "false" } }
+
+Outputs:
+  BronzeBucketName:
+    Value: !Ref BronzeBucket
+    Export: { Name: !Sub "${AWS::StackName}-BronzeBucketName" }
+  BronzeBucketArn:
+    Value: !GetAtt BronzeBucket.Arn
+    Export: { Name: !Sub "${AWS::StackName}-BronzeBucketArn" }
+  SilverBucketName:
+    Value: !Ref SilverBucket
+    Export: { Name: !Sub "${AWS::StackName}-SilverBucketName" }
+  SilverBucketArn:
+    Value: !GetAtt SilverBucket.Arn
+    Export: { Name: !Sub "${AWS::StackName}-SilverBucketArn" }
+  GoldBucketName:
+    Value: !Ref GoldBucket
+    Export: { Name: !Sub "${AWS::StackName}-GoldBucketName" }
+  GoldBucketArn:
+    Value: !GetAtt GoldBucket.Arn
+    Export: { Name: !Sub "${AWS::StackName}-GoldBucketArn" }
+  ArtifactsBucketName:
+    Value: !Ref ArtifactsBucket
+    Export: { Name: !Sub "${AWS::StackName}-ArtifactsBucketName" }

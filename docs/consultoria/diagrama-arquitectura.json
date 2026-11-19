@@ -1,0 +1,344 @@
+{
+  "formatVersion": 1,
+  "title": "Pharmacy Pulse - arquitectura en AWS (Lambdas)",
+  "meta": {
+    "author": "Equipo 6",
+    "version": "4.0",
+    "cost": "AWS esperado: menos de USD 0.05 al mes (Lambda dentro de la capa gratuita, S3 de pocos MB). Tope de AWS Budget: USD 5 con alerta al 80 %."
+  },
+  "groups": [
+    {
+      "id": "aws",
+      "label": "AWS Cloud",
+      "color": "melocoton",
+      "icon": "aws/group-cloud",
+      "kind": "physical"
+    },
+    {
+      "id": "reg",
+      "label": "Región (us-east-1 por defecto, Gate 1)",
+      "color": "cielo",
+      "icon": "aws/group-region",
+      "kind": "physical",
+      "parent": "aws"
+    },
+    {
+      "id": "proc",
+      "label": "Procesamiento: 4 Lambdas (Lambdas.yaml)",
+      "color": "menta",
+      "kind": "logical",
+      "parent": "reg"
+    },
+    {
+      "id": "lake",
+      "label": "Data lake medallón (Buckets.yaml)",
+      "color": "limon",
+      "icon": "aws/group-privatesubnet",
+      "kind": "logical",
+      "parent": "reg"
+    },
+    {
+      "id": "ops",
+      "label": "Operación, seguridad y costo",
+      "color": "lavanda",
+      "kind": "logical",
+      "parent": "reg"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "inegi",
+      "label": "INEGI",
+      "type": "external",
+      "sub": "Censo 2020 AGEB + DENUE CDMX",
+      "data": [
+        "public"
+      ],
+      "x": -400,
+      "y": 0,
+      "desc": "Dos zips públicos: Censo 2020 por AGEB y manzana urbana (CDMX) y DENUE CDMX, CSV completo."
+    },
+    {
+      "id": "ing",
+      "label": "Lambda ingesta",
+      "type": "function",
+      "icon": "aws/lambda",
+      "sub": "INEGI -> bronze",
+      "group": "proc",
+      "x": 0,
+      "y": 0,
+      "desc": "Descarga los zips, guarda en bronze/fuente/fecha=F y escribe el manifiesto con sha256. Idempotente."
+    },
+    {
+      "id": "lim",
+      "label": "Lambda limpieza",
+      "type": "function",
+      "icon": "aws/lambda",
+      "sub": "R2, R6 · bronze -> silver",
+      "group": "proc",
+      "x": 400,
+      "y": 0,
+      "desc": "Filtra 6 alcaldías, AGEB urbanas, farmacias SCIAN 464111/464112 y salud 621/622."
+    },
+    {
+      "id": "ind",
+      "label": "Lambda indicadores",
+      "type": "function",
+      "icon": "aws/lambda",
+      "sub": "R1 R3 R4 R5 R7 R8 · IPA",
+      "group": "proc",
+      "x": 800,
+      "y": 0,
+      "desc": "Une Censo y DENUE por AGEB, cuenta competencia a 500 m, calcula IPA 0-100 y ranking."
+    },
+    {
+      "id": "map",
+      "label": "Lambda mapa",
+      "type": "function",
+      "icon": "aws/lambda",
+      "sub": "mapa.html + resumen",
+      "group": "proc",
+      "x": 1200,
+      "y": 0,
+      "desc": "Mapa estático Leaflet en un solo HTML y resumen en Markdown."
+    },
+    {
+      "id": "bronze",
+      "label": "S3 bronze",
+      "type": "storage",
+      "icon": "aws/s3",
+      "sub": "Zips originales · versionado",
+      "group": "lake",
+      "data": [
+        "public"
+      ],
+      "x": 200,
+      "y": 300,
+      "desc": "Nunca se sobrescribe; una carpeta por fecha de descarga."
+    },
+    {
+      "id": "silver",
+      "label": "S3 silver",
+      "type": "storage",
+      "icon": "aws/s3",
+      "sub": "CSV limpio por versión",
+      "group": "lake",
+      "data": [
+        "public"
+      ],
+      "x": 600,
+      "y": 300,
+      "desc": "censo_ageb, censo_totales, denue_ageb, denue_puntos."
+    },
+    {
+      "id": "gold",
+      "label": "S3 gold",
+      "type": "storage",
+      "icon": "aws/s3",
+      "sub": "IPA · ranking · calidad · mapa",
+      "group": "lake",
+      "data": [
+        "public"
+      ],
+      "x": 1000,
+      "y": 300,
+      "desc": "zonas_ipa, ranking (versión y actual), reporte de calidad, mapa y resumen."
+    },
+    {
+      "id": "art",
+      "label": "S3 artifacts",
+      "type": "storage",
+      "icon": "aws/s3",
+      "sub": "lambdas/*.zip",
+      "group": "lake",
+      "x": -200,
+      "y": 300,
+      "desc": "Código de las 4 Lambdas generado por scripts/build.sh."
+    },
+    {
+      "id": "eb",
+      "label": "EventBridge",
+      "type": "generic",
+      "icon": "aws/eventbridge",
+      "sub": "Manifiesto nuevo -> siguiente Lambda",
+      "group": "ops",
+      "x": 400,
+      "y": 560,
+      "desc": "3 reglas Object Created con prefijo _manifiestos/ y un calendario trimestral apagado."
+    },
+    {
+      "id": "sns",
+      "label": "SNS",
+      "type": "generic",
+      "icon": "aws/sns",
+      "sub": "Alertas por correo",
+      "group": "ops",
+      "x": 800,
+      "y": 560,
+      "desc": "Reglas bloqueantes, errores de Lambda y presupuesto."
+    },
+    {
+      "id": "cw",
+      "label": "CloudWatch",
+      "type": "monitor",
+      "icon": "aws/cloudwatch",
+      "sub": "Logs 30 días · alarmas",
+      "group": "ops",
+      "x": 1200,
+      "y": 560
+    },
+    {
+      "id": "iam",
+      "label": "IAM",
+      "type": "security",
+      "icon": "aws/iam",
+      "sub": "Un rol por Lambda",
+      "group": "ops",
+      "x": 0,
+      "y": 560,
+      "desc": "Mínimo privilegio: cada función solo lee su capa de entrada y escribe en la de salida."
+    },
+    {
+      "id": "cfn",
+      "label": "CloudFormation",
+      "type": "devops",
+      "icon": "aws/cloudformation",
+      "sub": "Buckets.yaml + Lambdas.yaml",
+      "group": "ops",
+      "x": -400,
+      "y": 560,
+      "cost": 0
+    },
+    {
+      "id": "bud",
+      "label": "AWS Budgets",
+      "type": "monitor",
+      "sub": "Tope USD 5 · alerta 80 %",
+      "group": "ops",
+      "x": 1600,
+      "y": 560,
+      "cost": 0
+    },
+    {
+      "id": "client",
+      "label": "Pharmacy Pulse",
+      "type": "user",
+      "sub": "Ranking, mapa y resumen",
+      "x": 1600,
+      "y": 0
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "ing",
+      "to": "inegi",
+      "label": "descarga HTTPS",
+      "encrypted": true,
+      "data": [
+        "public"
+      ]
+    },
+    {
+      "id": "e2",
+      "from": "ing",
+      "to": "bronze",
+      "label": "zips + manifiesto",
+      "style": "data",
+      "encrypted": true
+    },
+    {
+      "id": "e3",
+      "from": "bronze",
+      "to": "lim",
+      "label": "manifiesto -> EventBridge",
+      "style": "async"
+    },
+    {
+      "id": "e4",
+      "from": "lim",
+      "to": "silver",
+      "label": "CSV limpio",
+      "style": "data",
+      "encrypted": true
+    },
+    {
+      "id": "e5",
+      "from": "silver",
+      "to": "ind",
+      "label": "manifiesto -> EventBridge",
+      "style": "async"
+    },
+    {
+      "id": "e6",
+      "from": "ind",
+      "to": "gold",
+      "label": "IPA y ranking",
+      "style": "data",
+      "encrypted": true
+    },
+    {
+      "id": "e7",
+      "from": "gold",
+      "to": "map",
+      "label": "manifiesto -> EventBridge",
+      "style": "async"
+    },
+    {
+      "id": "e8",
+      "from": "map",
+      "to": "gold",
+      "label": "mapa.html",
+      "style": "data",
+      "encrypted": true
+    },
+    {
+      "id": "e9",
+      "from": "gold",
+      "to": "client",
+      "label": "ranking, mapa, resumen"
+    },
+    {
+      "id": "e10",
+      "from": "ind",
+      "to": "sns",
+      "label": "regla bloqueante",
+      "style": "optional"
+    },
+    {
+      "id": "e11",
+      "from": "cw",
+      "to": "sns",
+      "label": "alarma de errores",
+      "style": "optional"
+    },
+    {
+      "id": "e12",
+      "from": "bud",
+      "to": "sns",
+      "label": "80 % del tope",
+      "style": "optional"
+    },
+    {
+      "id": "e13",
+      "from": "art",
+      "to": "ing",
+      "label": "código",
+      "style": "optional"
+    },
+    {
+      "id": "e14",
+      "from": "cfn",
+      "to": "iam",
+      "label": "crea",
+      "style": "optional"
+    },
+    {
+      "id": "e15",
+      "from": "eb",
+      "to": "lim",
+      "label": "dispara",
+      "style": "optional"
+    }
+  ]
+}

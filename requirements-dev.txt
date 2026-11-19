@@ -1,0 +1,4 @@
+# Solo para desarrollo y pruebas. Las Lambdas no tienen dependencias (boto3 ya viene en el runtime).
+boto3>=1.35
+moto[s3]>=5.0
+cfn-lint>=1.0

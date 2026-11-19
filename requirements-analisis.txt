@@ -1,0 +1,5 @@
+# Solo para el análisis exploratorio (scripts/analisis/). Las Lambdas no usan nada de esto.
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.5
+matplotlib>=3.8
