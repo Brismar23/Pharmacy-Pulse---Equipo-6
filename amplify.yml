@@ -1,0 +1,12 @@
+
+version: 1
+frontend:
+  phases:
+    build:
+      commands: []
+  artifacts:
+    baseDirectory: sitio-web
+    files:
+      - '**/*'
+  cache:
+    paths: []
