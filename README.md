@@ -2,7 +2,10 @@
 
 Pipeline de ingeniería de datos en AWS que toma datos públicos del INEGI (Censo 2020 por AGEB y DENUE), los limpia y valida con reglas de calidad, y publica un **ranking de zonas con un Índice de Potencial de Apertura (IPA, 0 a 100)**, un **mapa** y un **resumen** para que Pharmacy Pulse decida dónde buscar local en Benito Juárez, Coyoacán, Tlalpan, Iztapalapa, Gustavo A. Madero y Álvaro Obregón.
 
-Además, un **análisis exploratorio de las 16 alcaldías** con machine learning (tipos de zona y zonas con hueco de farmacias, confirmadas en Google Maps) y una **demo web** con filtros por alcaldía, edad, población y nivel socioeconómico.
+**Alcance principal del proyecto:** Desarrollar una solución de ingeniería de datos en AWS que permita priorizar zonas para la primera sucursal de Pharmacy Pulse, utilizando información pública del INEGI. El análisis contratado comprende seis alcaldías: Benito Juárez, Coyoacán, Tlalpan, Iztapalapa, Gustavo A. Madero y Álvaro Obregón.
+
+**Análisis exploratorio complementario:** Se incluye un estudio adicional de las 16 alcaldías de la Ciudad de México, con técnicas de machine learning y visualizaciones geográficas. Este análisis complementa la investigación, pero no sustituye los entregables establecidos en el RFP.
+
 
 > El IPA es una **priorización relativa** entre zonas, no un pronóstico de ventas. Las zonas del top se validan después en campo (rentas, flujo peatonal, locales disponibles).
 
@@ -33,7 +36,7 @@ flowchart LR
     BUD[AWS Budget USD 5<br/>alerta 80 %] -.-> SNS
 ```
 
-* **Cuatro Lambdas en Python 3.13, solo biblioteca estándar** (sin capas). Una por capa.
+* **Cuatro funciones AWS Lambda en Python 3.13**, organizadas por etapa: ingesta, limpieza, indicadores y generación del mapa.
 * **Data lake medallón en S3**: un bucket por capa (`bronze`, `silver`, `gold`) más `artifacts` para el código.
 * **Encadenamiento por eventos**: cada Lambda escribe un manifiesto al terminar y ese manifiesto dispara a la siguiente.
 * **CloudFormation en dos plantillas**: `infra/Buckets.yaml` (datos) e `infra/Lambdas.yaml` (cómputo, alertas, presupuesto).
@@ -80,6 +83,28 @@ flowchart LR
     └── decision_log.md              # decisiones a validar con el cliente
 ```
 
+### Componentes y decisiones de arquitectura
+
+| Componente | Función |
+|---|---|
+| Amazon S3 Bronze | Almacena las fuentes originales del INEGI y sus versiones |
+| Amazon S3 Silver | Conserva los datos limpios y estandarizados en CSV |
+| Amazon S3 Gold | Almacena indicadores, ranking, reporte de calidad y mapa |
+| Amazon S3 Artifacts | Almacena los paquetes de código de las funciones Lambda |
+| AWS Lambda | Ejecuta las cuatro etapas del pipeline |
+| Amazon EventBridge | Encadena las etapas mediante eventos y manifiestos |
+| AWS CloudFormation | Permite desplegar infraestructura reproducible |
+| Amazon CloudWatch | Registra ejecuciones y monitorea errores |
+| Amazon SNS | Envía alertas técnicas |
+| AWS Budgets | Genera alertas de costos según umbrales configurados |
+| IAM | Administra permisos de acceso a los recursos |
+
+**Ejecución:** La ingesta se inicia manualmente por defecto. La programación trimestral está definida, pero deshabilitada hasta que se active expresamente.
+
+**Formato de datos:** La implementación actual utiliza CSV en Silver y Gold. Parquet y las consultas analíticas mediante Athena o DuckDB quedan como alternativas sujetas a evaluación.
+
+**Seguridad:** Los buckets están configurados como privados, con cifrado y control de acceso. La aplicación efectiva de estas configuraciones se verificará durante el despliegue en AWS.
+
 ## Documentos
 
 * [RFP](docs/consultoria/rfp.md) y [SOW v2.0](docs/consultoria/sow.md).
@@ -98,6 +123,32 @@ flowchart LR
 
 Solo necesitas Python 3.11 o superior.
 
+Primero, clona el repositorio y prepara las dependencias:
+
+```bash
+git clone https://github.com/Brismar23/Pharmacy-Pulse---Equipo-6.git
+cd Pharmacy-Pulse---Equipo-6
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python3 -m pip install -r requirements-dev.txt
+```
+
+Para verificar la implementación local:
+
+```bash
+make test
+make local
+```
+
+`make test` ejecuta las pruebas automatizadas.
+
+`make local` utiliza datos sintéticos de prueba y ejecuta las cuatro etapas sin desplegar recursos en AWS.
+
+Para ejecutar el pipeline con datos reales deben utilizarse los archivos públicos del INEGI indicados en la siguiente sección.
+
+
 ```bash
 python3 scripts/run_local.py            # usa la muestra SINTÉTICA
 python3 -m unittest discover -s tests   # pruebas (las de S3 simulado piden: pip install -r requirements-dev.txt)
@@ -111,7 +162,31 @@ python3 scripts/run_local.py --censo ruta/ageb_mza_urbana_09_cpv2020_csv.zip --d
 
 Resultados en `outputs/`: `ranking.csv`, `mapa.html`, `resumen.md`, `reporte_calidad.json`, `zonas_ipa.csv`.
 
-### 2. En AWS con la CLI (15 minutos)
+### 2. Despliegue en AWS con la CLI (15 minutos)
+
+### Preparación y validación de AWS
+
+Antes de desplegar:
+
+1. Utilizar una cuenta AWS con MFA y una identidad de trabajo con permisos apropiados.
+2. Verificar que AWS CLI v2 esté instalada y configurada.
+3. Comprobar la identidad y región seleccionadas.
+4. Revisar los servicios y costos aplicables.
+5. Configurar un correo real para las alertas.
+
+Comandos de verificación:
+
+```bash
+aws --version
+aws sts get-caller-identity
+aws configure get region
+```
+
+El despliegue debe realizarse primero en un entorno de desarrollo (`dev`).
+
+El script `scripts/deploy.sh` crea o actualiza los stacks de almacenamiento y procesamiento mediante CloudFormation.
+
+**Importante:** una invocación aceptada por AWS Lambda no demuestra que todo el pipeline finalizó correctamente. Se deben revisar los registros, manifiestos y archivos de salida.
 
 Requisitos: AWS CLI v2 configurada (`aws configure`) con permisos de CloudFormation, S3, Lambda, IAM, EventBridge, SNS, CloudWatch y Budgets.
 
@@ -154,7 +229,9 @@ make analisis            # lee data/extraido/, escribe docs/resultados/, data/re
 
 Para volver a extraer los datos del INEGI desde el navegador: [docs/datos/fuentes_y_extraccion.md](docs/datos/fuentes_y_extraccion.md). La demo se abre con doble clic en `docs/demo/index.html`.
 
-## Resultados principales (CDMX, datos reales)
+## Resultados exploratorios de las 16 alcaldías
+
+> Estos resultados corresponden al análisis exploratorio complementario. El ranking contractual definitivo debe limitarse a las seis alcaldías definidas en el RFP y validarse con la metodología aprobada.
 
 * 2,301 zonas, 9.1 millones de habitantes, 7,450 farmacias.
 * Más saturadas: Milpa Alta (13.1 farmacias por 10 mil hab.), Tláhuac (11.3), Iztapalapa (9.9). Con más espacio: Álvaro Obregón (5.5).
@@ -175,13 +252,65 @@ Detalle y gráficas: [docs/resultados/README.md](docs/resultados/README.md).
 | `Alcaldias` | `003,005,007,010,012,014` | Alcaldías del ranking (`todas` para las 16) |
 | `CensoUrl`, `DenueUrl` | INEGI | Si INEGI cambia las rutas |
 
-## Garantías del pipeline
+## Controles implementados en código y pendientes de validación AWS
 
 * **bronze inmutable**: cada descarga va a `fecha=AAAA-MM-DD` y no se sobrescribe; el manifiesto guarda URL, tamaño y sha256.
 * **Idempotente**: dos ejecuciones sobre la misma versión de bronze producen los mismos bytes en silver y gold (hay prueba).
 * **Calidad**: R1-R8 del SOW en cada carga; si falla una bloqueante, no se publica el ranking y llega una alerta.
 * **Trazable**: cada ranking registra su `version_raw`; el linaje está en `docs/data_dictionary.md`.
-* **Costo**: unos 250 GB-segundo de Lambda por carga (la capa gratuita es de 400,000 al mes) y megabytes en S3. Budget con tope de USD 5 y alerta al 80 %.
+* **Costos:** La infraestructura incluye una configuración de AWS Budget de USD 5 mensuales, con alertas al superar el 80 % del gasto real y el 100 % del gasto previsto. Estas alertas no constituyen un límite automático de consumo. El costo real dependerá de la ejecución y los servicios utilizados.
+
+
+## Validación técnica y evidencias AWS
+
+La solución debe validarse tanto en el entorno local como en la infraestructura desplegada en AWS.
+
+### 1. Pruebas automatizadas
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+Las pruebas definidas en `tests/test_pipeline.py` incluyen:
+
+- Ejecución punta a punta con datos sintéticos.
+- Validación de reglas de calidad.
+- Comprobación de idempotencia.
+- Bloqueo de publicación ante errores críticos.
+- Validación de ponderaciones del IPA.
+- Integración con S3 simulado mediante Moto.
+
+La existencia de estas pruebas no sustituye la verificación de su resultado.
+
+### 2. Validación de infraestructura AWS
+
+Registrar evidencia de:
+
+| Recurso | Validación |
+|---|---|
+| CloudFormation | Stacks en estado CREATE_COMPLETE o UPDATE_COMPLETE |
+| S3 | Existencia de buckets Bronze, Silver, Gold y Artifacts |
+| Lambda | Cuatro funciones desplegadas y ejecutadas |
+| EventBridge | Invocación de las etapas posteriores |
+| CloudWatch | Logs de ejecución sin errores críticos |
+| SNS | Suscripción de alertas confirmada |
+| AWS Budgets | Presupuesto creado y alertas configuradas |
+
+### 3. Validación de resultados
+
+Verificar los siguientes objetos del bucket Gold:
+
+- `ranking/actual/ranking.csv`
+- `mapa/actual/index.html`
+- `resumen/actual/resumen.md`
+- Reporte de calidad correspondiente a la versión procesada.
+
+El ranking debe contener al menos diez zonas pertenecientes a las seis alcaldías del RFP.
+
+### 4. Evidencias documentales
+
+Las capturas de pantalla, resultados de pruebas y registros de validación se incorporarán a `docs/evidencias/aws/`.
+
 
 ## Equipo
 
@@ -189,5 +318,5 @@ Detalle y gráficas: [docs/resultados/README.md](docs/resultados/README.md).
 |---|---|
 | Brisa Mariana Gómez Luna | Project manager y documentación |
 | Javier de Jesús Infante Martínez | Data Engineer de ingesta y plataforma |
-| Ana Paula González Frías | Data Engineer de transformación |
-| Karen Pamela Rico Juárez | Calidad y gobierno de datos, y mapa |
+| Ana Paula González Frías | Data Engineer de Transformación |
+| Karen Pamela Rico Juárez | Data Quality & Governance Engineer — Calidad, gobierno y mapa |
