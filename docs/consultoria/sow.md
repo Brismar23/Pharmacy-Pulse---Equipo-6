@@ -13,6 +13,8 @@
 
 > Las decisiones que el RFP deja abiertas —unidad geográfica, categorías DENUE, tratamiento de unidades de salud, sustituto de ingreso y ponderaciones— se validan con Pharmacy Pulse en los Gates 1 y 2, antes de calcular el ranking definitivo.
 
+> **Nota (18 nov 2026):** después de esta versión, el equipo tomó tres decisiones de arquitectura que cambian las secciones 5.1 a 5.3 y 9: el pipeline corre en **cuatro AWS Lambdas** en lugar de `make pipeline` local, silver y gold se guardan en **CSV** en lugar de Parquet, y la infraestructura se divide en **`infra/Buckets.yaml` e `infra/Lambdas.yaml`**. Ver [ADR 0001](../adr/0001-alcance-y-complejidad-del-calculo.md), [ADR 0002](../adr/0002-lambda-vs-glue.md) y [ADR 0003](../adr/0003-cloudformation-dos-plantillas.md). Alcance, entregables, calendario y presupuesto no cambian.
+
 ## 0. Qué cambiamos respecto a la versión 1 y por qué
 
 | Cambio | Por qué |

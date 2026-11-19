@@ -1,0 +1,550 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Pharmacy Pulse - Plantilla 2 de 2: cuatro funciones Lambda (ingesta, limpieza,
+  indicadores, mapa), disparadores por evento, alertas, alarmas y presupuesto.
+  Importa los buckets de Buckets.yaml, que debe desplegarse primero. Antes de crear
+  esta pila, subir ingesta.zip, limpieza.zip, indicadores.zip y mapa.zip a la carpeta
+  lambdas/ del bucket artifacts (scripts/deploy.sh lo hace).
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: pharmacy-pulse
+    AllowedPattern: "^[a-z0-9-]{3,20}$"
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+  StorageStackName:
+    Type: String
+    Default: pharmacy-pulse-dev-storage
+    Description: Nombre del stack desplegado con Buckets.yaml.
+  CensoUrl:
+    Type: String
+    Default: https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/ageb_manzana/ageb_mza_urbana_09_cpv2020_csv.zip
+    Description: Censo 2020, principales resultados por AGEB y manzana urbana, CDMX (entidad 09).
+  DenueUrl:
+    Type: String
+    Default: https://www.inegi.org.mx/contenidos/masiva/denue/denue_09_csv.zip
+    Description: DENUE de la CDMX, edición vigente (CSV completo, no API).
+  Alcaldias:
+    Type: String
+    Default: "003,005,007,010,012,014"
+    Description: Claves INEGI de las alcaldías a analizar (por defecto las 6 del RFP) o "todas" para las 16.
+  PesosIpa:
+    Type: String
+    Default: '{"poblacion":0.30,"edades":0.15,"ingreso":0.15,"salud":0.10,"competencia":0.30}'
+    Description: Pesos del IPA (SOW 7.4). Deben sumar 1. Se aprueban con el cliente en el Gate 2.
+  MinPoblacion:
+    Type: Number
+    Default: 500
+    Description: Habitantes mínimos para que una AGEB entre al ranking.
+  RadioMetros:
+    Type: Number
+    Default: 500
+    Description: Radio para contar farmacias y unidades de salud alrededor de cada zona.
+  TopN:
+    Type: Number
+    Default: 20
+    MinValue: 10
+  AlertEmail:
+    Type: String
+    Default: ""
+    Description: Correo para alertas y presupuesto (opcional). Hay que confirmar la suscripción.
+  ScheduleState:
+    Type: String
+    Default: DISABLED
+    AllowedValues: [ENABLED, DISABLED]
+    Description: La carga normal es a demanda. Activar solo si el cliente quiere recargas automáticas.
+  ScheduleExpression:
+    Type: String
+    Default: cron(0 9 1 1,4,7,10 ? *)
+    Description: Trimestral, día 1 a las 9:00 hora CDMX (el DENUE se actualiza pocas veces al año).
+  CrearPresupuesto:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Crear el AWS Budget (requiere AlertEmail). Usar false si la cuenta ya tiene uno.
+  LimitePresupuestoUSD:
+    Type: Number
+    Default: 5
+
+Conditions:
+  HasAlertEmail: !Not [!Equals [!Ref AlertEmail, ""]]
+  CreateBudget: !And [!Condition HasAlertEmail, !Equals [!Ref CrearPresupuesto, "true"]]
+
+Resources:
+  # ================================================================ Alertas
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${ProjectName}-${Environment}-alertas"
+
+  AlertsEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: HasAlertEmail
+    Properties:
+      TopicArn: !Ref AlertsTopic
+      Protocol: email
+      Endpoint: !Ref AlertEmail
+
+  # ================================================================ 1. Ingesta (INEGI -> bronze)
+  IngestLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-${Environment}-ingesta"
+      RetentionInDays: 30
+
+  IngestRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ingesta
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "${IngestLogGroup.Arn}:*"
+              - Sid: EscribirBronze
+                Effect: Allow
+                Action: [s3:PutObject, s3:GetObject]
+                Resource: !Sub
+                  - "${Arn}/*"
+                  - Arn: { "Fn::ImportValue": !Sub "${StorageStackName}-BronzeBucketArn" }
+              - Sid: ListarBronze   # sin ListBucket, head_object devuelve 403 en vez de 404
+                Effect: Allow
+                Action: s3:ListBucket
+                Resource: { "Fn::ImportValue": !Sub "${StorageStackName}-BronzeBucketArn" }
+
+  IngestFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-${Environment}-ingesta"
+      Description: Descarga Censo 2020 por AGEB y DENUE CDMX del INEGI y los guarda tal cual en bronze.
+      Runtime: python3.13
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: { "Fn::ImportValue": !Sub "${StorageStackName}-ArtifactsBucketName" }
+        S3Key: lambdas/ingesta.zip
+      Role: !GetAtt IngestRole.Arn
+      MemorySize: 1024
+      Timeout: 900
+      EphemeralStorage: { Size: 3072 }
+      LoggingConfig: { LogGroup: !Ref IngestLogGroup }
+      Environment:
+        Variables:
+          BRONZE_BUCKET: { "Fn::ImportValue": !Sub "${StorageStackName}-BronzeBucketName" }
+          CENSO_URL: !Ref CensoUrl
+          DENUE_URL: !Ref DenueUrl
+          HTTP_TIMEOUT: "180"
+
+  IngestAsyncConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref IngestFunction
+      Qualifier: $LATEST
+      MaximumRetryAttempts: 1
+
+  SchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: scheduler.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition: { StringEquals: { aws:SourceAccount: !Ref AWS::AccountId } }
+      Policies:
+        - PolicyName: invocar-ingesta
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt IngestFunction.Arn
+
+  IngestSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: !Sub "${ProjectName}-${Environment}-ingesta-trimestral"
+      Description: Recarga opcional. Apagada por defecto; la carga normal se lanza a mano.
+      State: !Ref ScheduleState
+      ScheduleExpression: !Ref ScheduleExpression
+      ScheduleExpressionTimezone: America/Mexico_City
+      FlexibleTimeWindow: { Mode: "OFF" }
+      Target:
+        Arn: !GetAtt IngestFunction.Arn
+        RoleArn: !GetAtt SchedulerRole.Arn
+        Input: "{}"
+        RetryPolicy: { MaximumRetryAttempts: 2, MaximumEventAgeInSeconds: 3600 }
+
+  # ================================================================ 2. Limpieza (bronze -> silver)
+  CleanLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-${Environment}-limpieza"
+      RetentionInDays: 30
+
+  CleanRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: limpieza
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "${CleanLogGroup.Arn}:*"
+              - Sid: LeerBronze
+                Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub
+                  - "${Arn}/*"
+                  - Arn: { "Fn::ImportValue": !Sub "${StorageStackName}-BronzeBucketArn" }
+              - Sid: EscribirSilver
+                Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub
+                  - "${Arn}/*"
+                  - Arn: { "Fn::ImportValue": !Sub "${StorageStackName}-SilverBucketArn" }
+
+  CleanFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-${Environment}-limpieza"
+      Description: Filtra las seis alcaldías, limpia Censo y DENUE, reglas R2 y R6, escribe silver.
+      Runtime: python3.13
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: { "Fn::ImportValue": !Sub "${StorageStackName}-ArtifactsBucketName" }
+        S3Key: lambdas/limpieza.zip
+      Role: !GetAtt CleanRole.Arn
+      MemorySize: 2048
+      Timeout: 900
+      EphemeralStorage: { Size: 3072 }
+      LoggingConfig: { LogGroup: !Ref CleanLogGroup }
+      Environment:
+        Variables:
+          BRONZE_BUCKET: { "Fn::ImportValue": !Sub "${StorageStackName}-BronzeBucketName" }
+          SILVER_BUCKET: { "Fn::ImportValue": !Sub "${StorageStackName}-SilverBucketName" }
+          ALCALDIAS: !Ref Alcaldias
+
+  CleanAsyncConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref CleanFunction
+      Qualifier: $LATEST
+      MaximumRetryAttempts: 1
+
+  BronzeManifestRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub "${ProjectName}-${Environment}-bronze-manifiesto"
+      Description: Un manifiesto nuevo en bronze significa que las dos fuentes ya están completas.
+      EventPattern:
+        source: [aws.s3]
+        detail-type: [Object Created]
+        detail:
+          bucket:
+            name: [{ "Fn::ImportValue": !Sub "${StorageStackName}-BronzeBucketName" }]
+          object:
+            key: [{ prefix: "_manifiestos/" }]
+      Targets:
+        - Id: limpieza
+          Arn: !GetAtt CleanFunction.Arn
+
+  CleanInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref CleanFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt BronzeManifestRule.Arn
+
+  # ================================================================ 3. Indicadores (silver -> gold)
+  IndicatorsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-${Environment}-indicadores"
+      RetentionInDays: 30
+
+  IndicatorsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: indicadores
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "${IndicatorsLogGroup.Arn}:*"
+              - Sid: LeerSilver
+                Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub
+                  - "${Arn}/*"
+                  - Arn: { "Fn::ImportValue": !Sub "${StorageStackName}-SilverBucketArn" }
+              - Sid: EscribirGold
+                Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub
+                  - "${Arn}/*"
+                  - Arn: { "Fn::ImportValue": !Sub "${StorageStackName}-GoldBucketArn" }
+              - Sid: Alertas
+                Effect: Allow
+                Action: sns:Publish
+                Resource: !Ref AlertsTopic
+
+  IndicatorsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-${Environment}-indicadores"
+      Description: Une Censo y DENUE, reglas R1 R3 R4 R5 R7 R8, calcula el IPA y el ranking, escribe gold.
+      Runtime: python3.13
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: { "Fn::ImportValue": !Sub "${StorageStackName}-ArtifactsBucketName" }
+        S3Key: lambdas/indicadores.zip
+      Role: !GetAtt IndicatorsRole.Arn
+      MemorySize: 1024
+      Timeout: 300
+      LoggingConfig: { LogGroup: !Ref IndicatorsLogGroup }
+      Environment:
+        Variables:
+          SILVER_BUCKET: { "Fn::ImportValue": !Sub "${StorageStackName}-SilverBucketName" }
+          GOLD_BUCKET: { "Fn::ImportValue": !Sub "${StorageStackName}-GoldBucketName" }
+          ALERTS_TOPIC_ARN: !Ref AlertsTopic
+          ALCALDIAS: !Ref Alcaldias
+          PESOS_IPA: !Ref PesosIpa
+          MIN_POBLACION: !Ref MinPoblacion
+          RADIO_M: !Ref RadioMetros
+          TOP_N: !Ref TopN
+
+  IndicatorsAsyncConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref IndicatorsFunction
+      Qualifier: $LATEST
+      MaximumRetryAttempts: 1
+
+  SilverManifestRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub "${ProjectName}-${Environment}-silver-manifiesto"
+      EventPattern:
+        source: [aws.s3]
+        detail-type: [Object Created]
+        detail:
+          bucket:
+            name: [{ "Fn::ImportValue": !Sub "${StorageStackName}-SilverBucketName" }]
+          object:
+            key: [{ prefix: "_manifiestos/" }]
+      Targets:
+        - Id: indicadores
+          Arn: !GetAtt IndicatorsFunction.Arn
+
+  IndicatorsInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref IndicatorsFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt SilverManifestRule.Arn
+
+  # ================================================================ 4. Mapa (gold -> mapa y resumen)
+  MapLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-${Environment}-mapa"
+      RetentionInDays: 30
+
+  MapRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: mapa
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "${MapLogGroup.Arn}:*"
+              - Sid: LeerPuntosSilver
+                Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub
+                  - "${Arn}/denue_puntos/*"
+                  - Arn: { "Fn::ImportValue": !Sub "${StorageStackName}-SilverBucketArn" }
+              - Sid: LeerYEscribirGold
+                Effect: Allow
+                Action: [s3:GetObject, s3:PutObject]
+                Resource: !Sub
+                  - "${Arn}/*"
+                  - Arn: { "Fn::ImportValue": !Sub "${StorageStackName}-GoldBucketArn" }
+
+  MapFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-${Environment}-mapa"
+      Description: Genera el mapa estático (HTML) y el resumen del ranking en gold.
+      Runtime: python3.13
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: { "Fn::ImportValue": !Sub "${StorageStackName}-ArtifactsBucketName" }
+        S3Key: lambdas/mapa.zip
+      Role: !GetAtt MapRole.Arn
+      MemorySize: 512
+      Timeout: 120
+      LoggingConfig: { LogGroup: !Ref MapLogGroup }
+      Environment:
+        Variables:
+          SILVER_BUCKET: { "Fn::ImportValue": !Sub "${StorageStackName}-SilverBucketName" }
+          GOLD_BUCKET: { "Fn::ImportValue": !Sub "${StorageStackName}-GoldBucketName" }
+
+  MapAsyncConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref MapFunction
+      Qualifier: $LATEST
+      MaximumRetryAttempts: 1
+
+  GoldManifestRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub "${ProjectName}-${Environment}-gold-manifiesto"
+      EventPattern:
+        source: [aws.s3]
+        detail-type: [Object Created]
+        detail:
+          bucket:
+            name: [{ "Fn::ImportValue": !Sub "${StorageStackName}-GoldBucketName" }]
+          object:
+            key: [{ prefix: "_manifiestos/" }]
+      Targets:
+        - Id: mapa
+          Arn: !GetAtt MapFunction.Arn
+
+  MapInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref MapFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt GoldManifestRule.Arn
+
+  # ================================================================ Alarmas: cualquier error de una Lambda avisa por SNS
+  IngestErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${Environment}-ingesta-errores"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref IngestFunction }]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  CleanErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${Environment}-limpieza-errores"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref CleanFunction }]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  IndicatorsErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${Environment}-indicadores-errores"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref IndicatorsFunction }]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  MapErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${Environment}-mapa-errores"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref MapFunction }]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  # ================================================================ Presupuesto (SOW 5.5): tope USD 5, alerta al 80 %
+  MonthlyBudget:
+    Type: AWS::Budgets::Budget
+    Condition: CreateBudget
+    Properties:
+      Budget:
+        BudgetName: !Sub "${ProjectName}-${Environment}-tope-mensual"
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit: { Amount: !Ref LimitePresupuestoUSD, Unit: USD }
+      NotificationsWithSubscribers:
+        - Notification: { NotificationType: ACTUAL, ComparisonOperator: GREATER_THAN, Threshold: 80, ThresholdType: PERCENTAGE }
+          Subscribers: [{ SubscriptionType: EMAIL, Address: !Ref AlertEmail }]
+        - Notification: { NotificationType: FORECASTED, ComparisonOperator: GREATER_THAN, Threshold: 100, ThresholdType: PERCENTAGE }
+          Subscribers: [{ SubscriptionType: EMAIL, Address: !Ref AlertEmail }]
+
+Outputs:
+  IngestFunctionName:
+    Value: !Ref IngestFunction
+  CleanFunctionName:
+    Value: !Ref CleanFunction
+  IndicatorsFunctionName:
+    Value: !Ref IndicatorsFunction
+  MapFunctionName:
+    Value: !Ref MapFunction
+  AlertsTopicArn:
+    Value: !Ref AlertsTopic

@@ -1,0 +1,8 @@
+dist/
+*.zip
+__pycache__/
+*.pyc
+.local_s3/
+outputs/
+data/muestra/
+.DS_Store
